@@ -1,6 +1,13 @@
 # Agenda
 
-## Thurs, Feb 12
+## Tues, Feb 17 - Individual Meetings
+Optional meeting - can get help with GitHub things.
+
+TODO for Thursday:
+* Review the IR output for the Proof Of Concept (PoC) code that Dr. Lim gave us
+* Read this article about "recent" changes to V8: [https://v8.dev/blog/leaving-the-sea-of-nodes](https://v8.dev/blog/leaving-the-sea-of-nodes)
+
+## Thurs, Feb 12 - Group Meeting
 
 Taft and Ellora presented on compilers, JIT compilers, and the state of debugging JIT compilers. Today, we'll plan next steps and review GitHub.
 
