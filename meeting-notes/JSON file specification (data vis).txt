@@ -1,0 +1,55 @@
+JSON file specification (data vis)
+
+{
+    "nodes"[
+    {
+        "id":node id number,
+        "alive":true or false,
+        "address":"node address",
+        "opcode":"node opcode",
+        "is_cfgBlock":true or false,
+        "size":node size number,
+        "edges":[list of edge node ids],
+        "directValues": {
+            "offset":"value"
+        },
+        "opcode_update": {
+            "instruction id":"opcode"
+        },
+        "added": {
+            "instruction id":added node id number
+        },
+        "removed": {
+            "instruction id":removed node id number
+        },
+        "replaced": {
+            "instruction id": {
+                "from":replaced node id number,
+                "to":replacing node id number
+            }
+        },
+        "directValueOpt": {
+            "instruction id": {
+                "offset":offset from the block head address,
+                "valFrom":"value changed from",
+                "valTo":"value changed to",
+                "is_update":true or false
+            }
+        },
+        "instAccess": {
+            "instruction id": {
+                "fnCallRetId": function call-return id,
+                "fnId": function id,
+                "binary": instruction opcode & operands binary,
+                "type": access type number
+            }
+        }
+    }
+    ],
+    "fnId2Name": {
+        "fnId": "function name"
+    },
+    "fnCallRetId2fnId" {
+      "fnCallRetId":fnId
+    }
+}
