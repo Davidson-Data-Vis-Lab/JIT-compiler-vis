@@ -17,7 +17,7 @@ Email:
 ## Thurs, March 5 - Group Meeting
 
 We reviewed the scripts that T&E wrote (see [/toy-datesets/IR/test.py](https://github.com/Davidson-Data-Vis-Lab/JIT-compiler-vis/blob/main/toy-datasets/IR/test.py)). We added questions for Dr. Lim to answer to our document "[Questions for Dr. Lim](https://docs.google.com/document/d/13ARp0_arF0h8WDGxUjyThg4U_T_QsfG05Vn2HuBcGC4/edit?tab=t.0#heading=h.sohyrbsvxa6i)". We sent it to him and he answered some questions -- we discussed the responses and we were (mostly) right!
-
+* My [notes](https://docs.google.com/document/d/1X3vzoxyNtBlm-lqao0gwF0n8m4_QRKNz2eLNz-fxHBs/edit?usp=sharing)
 
 ## Tues, March 3 - Individual Meetings (Canceled)
 Taft and Ellora continued to work on their Python scripts. In our group meeting, we reviewed the code they wrote. They also compiled a list of questions to ask Dr. Lim.
