@@ -11,7 +11,8 @@ Email:
 >
 > I hope this helps your visualization progress, and let me know if you'd like me to review the changes in person.
 
-
+* phaseFnId -- categorizes instructions by phase
+* Used GraphViz to visualize -- does not include any optimizations, only the nodes that were "created" <-- what does this mean?
 
 ## Thurs, March 5 - Group Meeting
 
