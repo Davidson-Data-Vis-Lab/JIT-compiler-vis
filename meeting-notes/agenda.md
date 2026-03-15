@@ -2,13 +2,16 @@
 
 ## Fri, March 13 - Update from Dr. Lim
 Email:
-During the break, I spent some time improving the tool for modeling and generating an abstract model of V8 IR, considering the questions asked in the document.
 
-You can find the overview of changes I made in the "[JITCIRModeler Output Change](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?tab=t.0#heading=h.anls0jw7z3b9)" file, which is also in the "JSON data files for students" Google Drive folder. You can also see a more detailed description of the ir.json spec in the [code_fix branch](https://github.com/hlim1/JITCIRModeler/tree/code_fix) of the JITCIRModeler repository.
+> During the break, I spent some time improving the tool for modeling and generating an abstract model of V8 IR, considering the questions asked in the document.
+>
+> You can find the overview of changes I made in the "[JITCIRModeler Output Change](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?tab=t.0#heading=h.anls0jw7z3b9)" file, which is also in the "JSON data files for students" Google Drive folder. You can also see a more detailed description of the ir.json spec in the [code_fix branch](https://github.com/hlim1/JITCIRModeler/tree/code_fix) of the JITCIRModeler repository.
+>
+> I believe the most useful thing for the group is the phaseFnId in each element of instAccess. This enables all instructions to be properly categorized by phase, as with the IR nodes. I used Graphviz to visualize the graphs for each phase. This does not include any optimizations; it only displays nodes that were "created" during the optimization phase. The PNG files are available [here](https://drive.google.com/drive/u/0/folders/1Vb22n5hsmY2CDYhQKJQTcxmp7UFpIZoK), along with the Python script I used to generate them.
+>
+> I hope this helps your visualization progress, and let me know if you'd like me to review the changes in person.
 
-I believe the most useful thing for the group is the phaseFnId in each element of instAccess. This enables all instructions to be properly categorized by phase, as with the IR nodes. I used Graphviz to visualize the graphs for each phase. This does not include any optimizations; it only displays nodes that were "created" during the optimization phase. The PNG files are available [here](https://drive.google.com/drive/u/0/folders/1Vb22n5hsmY2CDYhQKJQTcxmp7UFpIZoK), along with the Python script I used to generate them.
 
-I hope this helps your visualization progress, and let me know if you'd like me to review the changes in person.
 
 ## Thurs, March 5 - Group Meeting
 
