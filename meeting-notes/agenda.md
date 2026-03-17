@@ -13,6 +13,8 @@ For students:
 * Meet w/Dr. Lim on Thursday afternoon
 * If time: this is the new [IR example file](https://drive.google.com/file/d/1ALzo0KvsLXkWG6zpCToMhdYOVQ08Ky4R/view?usp=drive_link) (also at toy-datasets/IR/ir-after-spring-break.json in this repo) and the [explanation of changes](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?usp=drive_link). Start sketching ideas of how to visualize the data, using the Graphvis phase images for inspiration.
   * This might be more beneficial after we meet with Dr. Lim, but some initial thoughts are welcome.
+  * Helpful slides for CFGs: https://docs.google.com/presentation/d/1Z9iIHojKDrXvZ27gRX51UxHD-bKf1QcPzSijntpMJBM/edit?slide=id.g19134d40cb_0_193#slide=id.g19134d40cb_0_193
+  * Reminder that V8 left the Sea of Nodes and went back to CFG: https://v8.dev/blog/leaving-the-sea-of-nodes
 
 
 
