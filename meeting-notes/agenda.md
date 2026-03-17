@@ -6,7 +6,7 @@ TODO:
 * Review the [Questions for Dr. Lim document](https://docs.google.com/document/d/13ARp0_arF0h8WDGxUjyThg4U_T_QsfG05Vn2HuBcGC4/edit?tab=t.0#heading=h.sohyrbsvxa6i)
 
 For students:
-* Review his code that used Graphviz to generate the graphs in [toy-datasets/IR/lim-phase-images-and-script/draw_phase_graphs.py](toy-datasets/IR/lim-phase-images-and-script/draw_phase_graphs.py). The IR JSON is in [toy-datasets/IR/ir-after-spring-break.json](toy-datasets/IR/ir-after-spring-break.json)
+* Review his code that used Graphviz to generate the graphs in [../toy-datasets/IR/lim-phase-images-and-script/draw_phase_graphs.py](../toy-datasets/IR/lim-phase-images-and-script/draw_phase_graphs.py). The IR JSON is in [../toy-datasets/IR/ir-after-spring-break.json](../toy-datasets/IR/ir-after-spring-break.json)
   * Also stored in KPW's drive at .JIT IR Visualizations/JSON data files for students/[Graph Visualizations by Phase](https://drive.google.com/drive/folders/1Vb22n5hsmY2CDYhQKJQTcxmp7UFpIZoK?usp=drive_link)
 * Create a key for interpreting those graphs -- what do all of the nodes and edges mean? What are each of the text attributes? Question for Dr. Lim -- what does this/these graphs tell you?
 * Add the key to this repo
