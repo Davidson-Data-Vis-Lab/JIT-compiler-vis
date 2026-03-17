@@ -1,5 +1,20 @@
 # Agenda
 
+## Tues, March 17 - Individual meetings
+TODO:
+* Discuss Dr. Lim's updates with each student
+* Review the [Questions for Dr. Lim document](https://docs.google.com/document/d/13ARp0_arF0h8WDGxUjyThg4U_T_QsfG05Vn2HuBcGC4/edit?tab=t.0#heading=h.sohyrbsvxa6i)
+
+For students:
+* Review his code that used Graphviz to generate the graphs in .JIT IR Visualizations/JSON data files for students/[Graph Visualizations by Phase](https://drive.google.com/drive/folders/1Vb22n5hsmY2CDYhQKJQTcxmp7UFpIZoK?usp=drive_link)
+* Create a key for interpreting those graphs -- what do all of the nodes and edges mean? What are each of the text attributes? Question for Dr. Lim -- what does this/these graphs tell you?
+* Add the key to this repo
+* Meet w/Dr. Lim on Thursday afternoon
+* If time: this is the new [IR example file](https://drive.google.com/file/d/1ALzo0KvsLXkWG6zpCToMhdYOVQ08Ky4R/view?usp=drive_link) and the [explanation of changes](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?usp=drive_link). Start sketching ideas of how to visualize the data, using the Graphvis phase images for inspiration.
+  * This might be more beneficial after we meet with Dr. Lim, but some initial thoughts are welcome.
+
+
+
 ## Fri, March 13 - Update from Dr. Lim
 Email:
 
