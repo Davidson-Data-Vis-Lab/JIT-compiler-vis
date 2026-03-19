@@ -1,5 +1,23 @@
 # Agenda
 
+## Thurs, March 19 - Group meeting w/Dr. Lim
+[KPW's notes](https://docs.google.com/document/d/1g4_3888UAilN6SfDOdPocQvBVXiTlIckGliKbLUqvJ8/edit?usp=sharing)
+
+We spoke at the end about visualizing the new IR data, and doing it poorly (meaning, visualizing everything all at once, rather than phase by phase). In our example file, there's 93 nodes and many more edges, so it should end up looking something like in [Dr. Lim's paper](https://drive.google.com/file/d/1aFLgaOMU6KNbhORWCpUZ6YFQkaGEn2yB/view?usp=sharing) (see hairball picture in Figure 2).
+
+To do this, let's make a branch in our [JIT-compiler-vis repository](https://github.com/Davidson-Data-Vis-Lab/JIT-compiler-vis/tree/main) called tool-building. Create a new web tool: you'll need an index.html file, a main.js file, and a style.css file. From there, we'll want to make a disjoint graph, ideally with directed edges:
+* Disjoint (maybe) because not all nodes are connected to another node (this could be false)
+* Directed edges: have arrows from one to the other. This is a surprisingly tricky thing to include sometimes in JavaScript, so it's ok if we have plain edges to start
+
+
+Code to use for inspiration:
+* [https://observablehq.com/@d3/disjoint-force-directed-graph/2](https://observablehq.com/@d3/disjoint-force-directed-graph/2)
+* [Lab 6](https://docs.google.com/document/d/1Bg9b-rQukDJE4lqDtjT938lENsxKvFe475PhgsCuaBE/edit?usp=sharing), specifically the section "Graphs and Hierarchies"
+
+You're welcome to use AI to generate the code so long as it's simple enough for us to understand. This is our first draft of a visualization, so we need to understand it so that we can tweak it and build on it.
+
+**I'll check your Partner Forms on Monday after you two are done working to see the status of your code. Please also push your branch to GitHub at that point so that I can see the code. After that, we'll make the decision about meeting on Tuesday**
+
 ## Tues, March 17 - Individual meetings
 TODO:
 * Discuss Dr. Lim's updates with each student
