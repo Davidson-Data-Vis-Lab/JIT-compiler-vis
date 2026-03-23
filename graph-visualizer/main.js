@@ -46,11 +46,13 @@ async function initVis() {
 
     console.log("nodes:", nodes);
    
+    // Creating a map with nodes to edges array 
     nodes.forEach(node => {
         edges.set(node.id, node.edges)
         console.log(edges.get(node.id))
     });
 
+    // Mapping each node out to equidistance apart 
     var circles = []
     var xCoordinate = 20;
     var yCoordinate = 10;
@@ -70,6 +72,7 @@ async function initVis() {
 
     console.log(circles[0]);
 
+    // Drawing circles out onto screen
     svg.selectAll("circle")
         .data(circles)
         .enter()
