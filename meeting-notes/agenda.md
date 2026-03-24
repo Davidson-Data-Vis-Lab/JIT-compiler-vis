@@ -1,5 +1,27 @@
 # Agenda
 
+## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)\
+
+Agenda:
+* Updates since last time
+  * Taft and Ellora worked on [programming a visualization](https://github.com/Davidson-Data-Vis-Lab/JIT-compiler-vis/tree/tool-building), to get their feet wet and to start brainstorming
+    * Notes
+  * Dr. Williams nearly completed the IRB application 
+    * Emails, scripts for interviews, details
+    * Added Dr. Lim so that he can join interviews. He needs to complete HSIRB training (human-subjects training)
+      * Optional for students
+
+  * Keep building over the next week. Individual code review on Tuesday -- I'm looking for a short recap of relevant visualization/graph drawing techinques and sketches of how you think we could use some of these techniques in our visualization.
+    * Expected time: 3-4 hours to look up techniques and makes slides, 1-2 hours to make sketches.
+    * For example, one we used in [Lab 8 was the Force-Directed Layout](https://docs.google.com/document/d/1aZvdt_JhqttjF-AIbYyCH_p7IgqszKaOBayk_DcrS9A/edit?tab=t.0#heading=h.74fvo7160ixj). How could we use this code? Why would it work or why would it be a poor choice?
+    * **Deliverables: quick presentation of 3 types of graph visualizations plus at least 1 technique for graph drawing (review the [Wikipedia article](https://en.wikipedia.org/wiki/Graph_drawing#:~:text=In%20the%20case%20of%20directed,adjacency%20matrix%20of%20the%20graph), especially the Layout Methods and Application-Specific Graph Drawings sections).**
+        * All 4 of your choices (3 graph vises and 1 drawing technique) should be reasonable for our dataset -- this will require some reviewing and researching on your part. For example, arc diagrams would *not* be a reasonable choice for this dataset.
+        * Use ideas from your research (doesn't have to be *only* the 4 topics you found) to draw 3 different sketches of how we could visualize this data.
+          * I'm looking for visualizations that have both nodes and edges, and also provide some way to connect the different phases ("connect" used loosely here).
+    * **Submit your slides and sketches to this [Google Form](https://forms.gle/bT1UTtuJ7Ced3JJH8) by 11:59 PM on Monday, March 30.**
+
+  
+
 ## Thurs, March 19 - Group meeting w/Dr. Lim
 [KPW's notes](https://docs.google.com/document/d/1g4_3888UAilN6SfDOdPocQvBVXiTlIckGliKbLUqvJ8/edit?usp=sharing)
 
