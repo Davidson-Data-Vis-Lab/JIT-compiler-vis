@@ -15,19 +15,19 @@ async function loadData() {
   return IR_data;
 }
 
-//Store data into global object
-// IR_data = loadData().catch(console.warn);
-
 /**
  * Sets up the visualization, creating an SVG and reading in nodes
  * and edges
  */
 async function initVis() {
-    const data = await loadData();
-    const width = 200;
+    let vis = this;
 
+    const data = await loadData();
+
+    const width = 200;
     const boxHeight = 200;
-    const svg = d3.select("#chart-area")
+
+    vis.svg = d3.select("#chart-area")
         .append("svg")
         .attr('viewBox', [0, 0, width, boxHeight]);
 
@@ -40,20 +40,42 @@ async function initVis() {
     const markerHeight = markerBoxHeight / 2;
     const arrowPoints = [[0, 0], [0, 20], [20, 10]];
 
-    // Loading in a constant for 
-    const nodes = data.nodes;
-    const edges = new Map();
+    //Enables us to turn paths into directional arrows
+    svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 5)
+        .attr("refY", 0)
+        .attr("markerWidth", 2.5)
+        .attr("markerHeight", 2.5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#ff0000");
 
-    console.log("nodes:", nodes);
+    //Organize data for easier access
+    const nodes = data.nodes;
+    const nodeToEdges = new Map();
    
-    // Creating a map with nodes to edges array 
+    // Creating a map with nodes to respective edges array 
     nodes.forEach(node => {
-        edges.set(node.id, node.edges)
-        console.log(edges.get(node.id))
+        nodeToEdges.set(node.id, node.edges)
+    });
+
+    const edges = [];
+    // Create an array of arrays that represent all edges
+    nodes.forEach(node => {
+        var node_edges = nodeToEdges.get(node.id)
+        node_edges.forEach(targetNode => {
+            if (targetNode != -1) {
+                edges.push([node.id, targetNode])
+            }
+        });
     });
 
     // Mapping each node out to equidistance apart 
-    var circles = []
+    vis.circles = []
     var xCoordinate = 20;
     var yCoordinate = 10;
     nodes.forEach(node => {
@@ -64,47 +86,57 @@ async function initVis() {
         }
         node_coordinates.set("x", xCoordinate);
         node_coordinates.set("y", yCoordinate);
-        circles.push(node_coordinates)
+        vis.circles.push(node_coordinates)
         xCoordinate += 10;
         });
+    
+    //Create explict links (edges) where source node coordinates are aligned with target node coordinates
+    vis.links = edges
+    .map(([sourcenode, targetnode]) => {
+        const sourcenode_coordinates = vis.circles[sourcenode]
+        const targetnode_coordinates = vis.circles[targetnode]
+        return {source: sourcenode_coordinates, target: targetnode_coordinates}
+    })
 
-    console.log("circles:", circles)
+    // Gives d3 a mapping of how to extract data and create paths
+    vis.linkPath = d3.linkHorizontal()
+        .x(d => d.get("x"))
+        .y(d => d.get("y"));
 
-    console.log(circles[0]);
-
-    // Drawing circles out onto screen
-    svg.selectAll("circle")
-        .data(circles)
-        .enter()
-        .append("circle")
-        .attr("cx", (d, i) => circles[i].get("x"))  
-        .attr("cy", (d, i) => circles[i].get("y")) 
-        .attr("r", 1) 
-        .attr("fill", "steelblue");
-
-    svg.selectAll("edges")
-        .data(edges)
-        .enter()
-        .append(d3.linkHorizontal()
-        .x(d, circles[edges.get(i)])
-    )
-
-
-    // svg.selectAll("circle")
-    //     .data(nodes)
-    //     .enter()
-    //     .append("circle")
-    //     .attr("cx", (d, i) => (i * 40) % width + 20)  
-    //     .attr("cy", (d, i) => Math.floor(i / (width / 40)) * 40 + 20)
-    //     .attr("r", 5)
-    //     .attr("fill", "steelblue")
-    //     .attr("opacity", 0.7);
-
+    renderVis();
 
 }
 
+/**
+ * Draws the nodes and edges onto the SVG
+ */
+function renderVis() {
+    let vis = this;
 
-//Delay initVis to ensure data has loaded
+    // Drawing circles out onto screen
+    vis.svg.selectAll("circle")
+        .data(circles)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("cx", (d, i) => d.get("x"))  
+        .attr("cy", (d, i) => d.get("y")) 
+        .attr("r", 1) 
+        .attr("fill", "steelblue");
+
+    // Draw the paths
+    vis.svg.selectAll("path.edge")
+        .data(vis.links)
+        .enter()
+        .append("path")
+        .attr("class", "edge")
+        .attr("d", vis.linkPath)
+        .attr("fill", "none")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", 0.5)
+        .attr("marker-end", "url(#arrow)");
+}
+
 initVis();
 
 
