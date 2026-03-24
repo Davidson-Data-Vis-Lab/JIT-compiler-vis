@@ -5,9 +5,14 @@
 Agenda:
 * Updates since last time
   * Taft and Ellora worked on [programming a visualization](https://github.com/Davidson-Data-Vis-Lab/JIT-compiler-vis/tree/tool-building), to get their feet wet and to start brainstorming
-    * Notes
+    * We bound the data to the circles and added text elements to show the ID for each node (circle). 
+	* TODO (optional, can be later work):
+    	* Figure out the `cx` spacing for the circles and text so that we see all 93 nodes in a nice layout
+       	* Add node numbers (done, minor editing needed)
+       	* Add buttons to show/hide phases. Buttons should be below the rows of nodes. If I click on a button like button "Phase 8", all of the nodes that are alive in phase 8 should have `opacity: 100%` and all other nodes should have `opacity: 50%`. For now, only allow for one phase to be on/off at a time.
   * Dr. Williams nearly completed the IRB application 
-    * Emails, scripts for interviews, details
+    * Emails, [scripts for interviews](https://docs.google.com/document/d/12oJefpEDQESdi6lroOaqXBC7Zy78PaEEyOAMFsbw__Y/edit?usp=sharing), details
+    * T&E can review interview questions and add comments, if desired. Since these will be semi-structured interviews, we can add additional questions as we think of them (or if they come up in the interview).
     * Added Dr. Lim so that he can join interviews. He needs to complete HSIRB training (human-subjects training)
       * Optional for students
 
