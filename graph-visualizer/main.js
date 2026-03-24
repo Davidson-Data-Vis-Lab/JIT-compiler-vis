@@ -15,35 +15,128 @@ async function loadData() {
   return IR_data;
 }
 
-//Store data into global object
-IR_data = loadData().catch(console.warn);
-
 /**
  * Sets up the visualization, creating an SVG and reading in nodes
  * and edges
  */
-function initVis() {
-    const height = 300;
-    const width = 700;
-    const margin = {left: 10, top: 10, right: 10, bottom: 10};
+async function initVis() {
+    let vis = this;
 
-    var svg = d3.select('#chart-area').append("svg")
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom);
+    const data = await loadData();
 
-    const nodes = IR_data.nodes.map(d => ({...d}));
+    const width = 200;
+    const boxHeight = 200;
 
-    var edges = new Map();
+    vis.svg = d3.select("#chart-area")
+        .append("svg")
+        .attr('viewBox', [0, 0, width, boxHeight]);
 
+    // Define the arrowhead marker variables
+    const markerBoxWidth = 20;
+    const markerBoxHeight = 20;
+    const refX = markerBoxWidth / 2;
+    const refY = markerBoxHeight / 2;
+    const markerWidth = markerBoxWidth / 2;
+    const markerHeight = markerBoxHeight / 2;
+    const arrowPoints = [[0, 0], [0, 20], [20, 10]];
+
+    //Enables us to turn paths into directional arrows
+    svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 5)
+        .attr("refY", 0)
+        .attr("markerWidth", 2.5)
+        .attr("markerHeight", 2.5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#ff0000");
+
+    //Organize data for easier access
+    const nodes = data.nodes;
+    const nodeToEdges = new Map();
+   
+    // Creating a map with nodes to respective edges array 
     nodes.forEach(node => {
-        edges.set(node.id, node.edges)
-        console.log(edges.get(node.id))
+        nodeToEdges.set(node.id, node.edges)
     });
+
+    const edges = [];
+    // Create an array of arrays that represent all edges
+    nodes.forEach(node => {
+        var node_edges = nodeToEdges.get(node.id)
+        node_edges.forEach(targetNode => {
+            if (targetNode != -1) {
+                edges.push([node.id, targetNode])
+            }
+        });
+    });
+
+    // Mapping each node out to equidistance apart 
+    vis.circles = []
+    var xCoordinate = 20;
+    var yCoordinate = 10;
+    nodes.forEach(node => {
+        node_coordinates = new Map
+        if (xCoordinate >= width) {
+            xCoordinate = 20;
+            yCoordinate += 10;
+        }
+        node_coordinates.set("x", xCoordinate);
+        node_coordinates.set("y", yCoordinate);
+        vis.circles.push(node_coordinates)
+        xCoordinate += 10;
+        });
+    
+    //Create explict links (edges) where source node coordinates are aligned with target node coordinates
+    vis.links = edges
+    .map(([sourcenode, targetnode]) => {
+        const sourcenode_coordinates = vis.circles[sourcenode]
+        const targetnode_coordinates = vis.circles[targetnode]
+        return {source: sourcenode_coordinates, target: targetnode_coordinates}
+    })
+
+    // Gives d3 a mapping of how to extract data and create paths
+    vis.linkPath = d3.linkHorizontal()
+        .x(d => d.get("x"))
+        .y(d => d.get("y"));
+
+    renderVis();
 
 }
 
-//Delay initVis to ensure data has loaded
-setTimeout(initVis, 2500);
+/**
+ * Draws the nodes and edges onto the SVG
+ */
+function renderVis() {
+    let vis = this;
 
+    // Drawing circles out onto screen
+    vis.svg.selectAll("circle")
+        .data(circles)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("cx", (d, i) => d.get("x"))  
+        .attr("cy", (d, i) => d.get("y")) 
+        .attr("r", 1) 
+        .attr("fill", "steelblue");
+
+    // Draw the paths
+    vis.svg.selectAll("path.edge")
+        .data(vis.links)
+        .enter()
+        .append("path")
+        .attr("class", "edge")
+        .attr("d", vis.linkPath)
+        .attr("fill", "none")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", 0.5)
+        .attr("marker-end", "url(#arrow)");
+}
+
+initVis();
 
 
