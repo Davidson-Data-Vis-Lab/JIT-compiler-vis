@@ -16,7 +16,7 @@ Agenda:
     * Added Dr. Lim so that he can join interviews. He needs to complete HSIRB training (human-subjects training)
       * Optional for students
 
-  * Keep building over the next week. Individual code review on **Tuesday, March 31** -- I'm looking for a short recap of relevant visualization/graph drawing techinques and sketches of how you think we could use some of these techniques in our visualization.
+  * Keep building over the next week. Individual code review on **Tuesday, March 31** -- I'm looking for a short recap of relevant visualization/graph drawing techniques and sketches of how you think we could use some of these techniques in our visualization.
     * Expected time: 3-4 hours to look up techniques and makes slides, 1-2 hours to make sketches.
     * For example, one we used in [Lab 8 was the Force-Directed Layout](https://docs.google.com/document/d/1aZvdt_JhqttjF-AIbYyCH_p7IgqszKaOBayk_DcrS9A/edit?tab=t.0#heading=h.74fvo7160ixj). How could we use this code? Why would it work or why would it be a poor choice?
     * **Deliverables: quick presentation of 3 types of graph visualizations plus at least 1 technique for graph drawing (review the [Wikipedia article](https://en.wikipedia.org/wiki/Graph_drawing#:~:text=In%20the%20case%20of%20directed,adjacency%20matrix%20of%20the%20graph), especially the Layout Methods and Application-Specific Graph Drawings sections).**
