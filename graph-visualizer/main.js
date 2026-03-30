@@ -55,12 +55,13 @@ async function initVis() {
         .attr("fill", "#ff0000");
 
     //Organize data for easier access
-    const nodes = data.nodes;
+    vis.nodes = data.nodes;
     const nodeToEdges = new Map();
    
     // Creating a map with nodes to respective edges array 
     nodes.forEach(node => {
         nodeToEdges.set(node.id, node.edges)
+        console.log(nodeToEdges.get(node.id));
     });
 
     const edges = [];
@@ -115,14 +116,45 @@ function renderVis() {
 
     // Drawing circles out onto screen
     vis.svg.selectAll("circle")
-        .data(circles)
+        .data(vis.nodes)
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("cx", (d, i) => d.get("x"))  
-        .attr("cy", (d, i) => d.get("y")) 
+        .attr("cx", (d, i) => 40 + ((i * 6) % 40)) // improve this spacing algorithm
+        .attr("cy", (d, i) => {
+            if (i < 30) {
+                return 40;
+            }
+            else if (i < 60) {
+                return 45;
+            }
+            else {
+                return 50;
+            }
+        })
         .attr("r", 1) 
         .attr("fill", "steelblue");
+
+    vis.svg.selectAll("text")
+        .data(vis.nodes)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", (d, i) => 40 + ((i * 6) % 40)) // update algorithm here 
+        .attr("y", (d, i) => {
+            if (i < 30) {
+                return 40;
+            }
+            else if (i < 60) {
+                return 45;
+            }
+            else {
+                return 50;
+            }
+        }) 
+        .attr("fill", "black")
+        .style("font-size", "2px")
+        .text(d => d.id);
 
     // Draw the paths
     vis.svg.selectAll("path.edge")
