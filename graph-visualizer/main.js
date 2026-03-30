@@ -61,7 +61,7 @@ async function initVis() {
     // Creating a map with nodes to respective edges array 
     nodes.forEach(node => {
         nodeToEdges.set(node.id, node.edges)
-        console.log(nodeToEdges.get(node.id));
+        //console.log(nodeToEdges.get(node.id));
     });
 
     const edges = [];
@@ -104,6 +104,7 @@ async function initVis() {
         .x(d => d.get("x"))
         .y(d => d.get("y"));
 
+    organizeEdges();
     renderVis();
 
 }
@@ -120,40 +121,51 @@ function renderVis() {
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("cx", (d, i) => 40 + ((i * 6) % 40)) // improve this spacing algorithm
+        .attr("cx", (d, i) => 40 + ((i * 9) % 120)) // improve this spacing algorithm
         .attr("cy", (d, i) => {
-            if (i < 30) {
-                return 40;
-            }
-            else if (i < 60) {
-                return 45;
-            }
-            else {
-                return 50;
-            }
+
+
+            return i + 20
+            // if (i < 10) {
+            //     return 30;
+            // }
+            // if (i < 20) {
+            //     return 40;
+            // }
+            // else if (i < 30) {
+            //     return 50;
+            // }
+            // else if (i < 40) {
+            //     return 60;
+            // }
+            // else {
+            //     return 70;
+            // }
         })
-        .attr("r", 1) 
-        .attr("fill", "steelblue");
+        .attr("r", 2.5) 
+        .attr("fill", "steelblue")
+        .attr("opacity");
 
     vis.svg.selectAll("text")
         .data(vis.nodes)
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d, i) => 40 + ((i * 6) % 40)) // update algorithm here 
+        .attr("x", (d, i) => 38.5 + ((i * 9) % 120)) // update algorithm here 
         .attr("y", (d, i) => {
-            if (i < 30) {
-                return 40;
-            }
-            else if (i < 60) {
-                return 45;
-            }
-            else {
-                return 50;
-            }
+            return i + 20
+            // if (i < 30) {
+            //     return 40;
+            // }
+            // else if (i < 60) {
+            //     return 45;
+            // }
+            // else {
+            //     return 50;
+            // }
         }) 
         .attr("fill", "black")
-        .style("font-size", "2px")
+        .style("font-size", "2.5px")
         .text(d => d.id);
 
     // Draw the paths
@@ -171,4 +183,39 @@ function renderVis() {
 
 initVis();
 
+/**
+ * Creates a dictionary object that tracks the current edges of each node
+ * for every optimization phase.
+ * 
+ * Returns the dictionary object
+ */
+function organizeEdges() {
+    let vis = this;
+
+    nodeEdges = new Map();
+
+    vis.nodes.forEach(node => {
+
+        phaseDictionary = new Map();
+        nodeEdges.set(node.ID, phaseDictionary)
+
+        node_removed = node.removed;
+        node_replaced = node.replaced;
+        node_instructions = node.instAccess;
+
+        edge_relevant_instructions = [];
+
+        node_removed.keys().forEach(instruction => {
+            edge_relevant_instructions.push(instruction);
+        });
+
+        node_replaced.keys().forEach(instruction => {
+            edge_relevant_instructions.push(instruction);
+        });
+
+        edge_relevant_instructions.sort(a, b => (a - b));
+
+        //sconsole.log(edge_relevant_instructions);
+    })
+}
 
