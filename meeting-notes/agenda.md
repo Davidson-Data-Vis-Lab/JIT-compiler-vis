@@ -6,6 +6,11 @@ T&E are updating KPW about the programming they have done for the visualization.
 Goal: make something relatively easily that helps us understand the dataset. 
 Goal: makes sure the code is flexible enough to be modified for new datasets.
 
+Updates:
+* We think there's a bug with initial edges. TODO on Tuesday (which is a Monday schedule) is fix this bug and make sure organizeEdges() works correctly.
+* Ensure the other data-cleaning functions are correct
+* Add the edges to the visualization (will look like a hairball). Then try to add a hover effect so if we hover over a node, we see all outgoing edges (or add a hover effect on an edge so that we can see the edge and nodes it connects). Can do this by adding an outline around the nodes and increasing the thickness of the edge and color of the edge (make the other edges lighter and thinner)
+
 ## Tues, March 30 - Individual meetings 
 Taft and Ellora presented the different graph layout styles and techniques that they researched (my [notes](https://docs.google.com/document/d/1NkDcMBiCtUrvxlRtBJj7Umh8a8dw95E7nx9EhvBm8CI/edit?usp=sharing)). We discussed potentially using Sugiyama layout or a 3-D layout, several others. Ellora had the foresight to consider how we could compare different phases so she proposed radar charts. Taft brought up circle packing and 3-D layouts, which could work but have constraints (circe packing needs to be a hierarchy, 3-D is tricky in 2-D). However, the 3-D idea is probably most intuitive if we can do it well. Another alternative was the idea to lay out the phases sequentially. 
 
