@@ -1,6 +1,15 @@
 # Agenda
 
-## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)\
+## Thurs, April 2 - Group Meeting
+T&E are updating KPW about the programming they have done for the visualization. 
+
+Goal: make something relatively easily that helps us understand the dataset. 
+Goal: makes sure the code is flexible enough to be modified for new datasets.
+
+## Tues, March 30 - Individual meetings 
+Taft and Ellora presented the different graph layout styles and techniques that they researched (my [notes](https://docs.google.com/document/d/1NkDcMBiCtUrvxlRtBJj7Umh8a8dw95E7nx9EhvBm8CI/edit?usp=sharing)). We discussed potentially using Sugiyama layout or a 3-D layout, several others. Ellora had the foresight to consider how we could compare different phases so she proposed radar charts. Taft brought up circle packing and 3-D layouts, which could work but have constraints (circe packing needs to be a hierarchy, 3-D is tricky in 2-D). However, the 3-D idea is probably most intuitive if we can do it well. Another alternative was the idea to lay out the phases sequentially. 
+
+## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)
 
 Agenda:
 * Updates since last time
