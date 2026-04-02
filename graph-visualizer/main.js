@@ -24,15 +24,17 @@ async function initVis() {
 
     const data = await loadData();
 
-    const width = 200;
-    const boxHeight = 200;
+    const width = 900;
+    const boxHeight = 1000;
 
     //Default view for showing all nodes at full opacity.
     vis.filter = "none";
 
     vis.svg = d3.select("#chart-area")
         .append("svg")
-        .attr('viewBox', [0, 0, width, boxHeight]);
+        .attr("width", width)
+        .attr("height", boxHeight);
+        //.attr('viewBox', [0, 0, width, boxHeight]);
 
     // Define the arrowhead marker variables
     const markerBoxWidth = 20;
@@ -134,6 +136,8 @@ function updateVis() {
 function renderVis() {
     let vis = this;
 
+    const radius = 35;
+
     //Remove all previous elements so that we can redraw with new opacity values
     vis.svg.selectAll("*").remove();
 
@@ -143,11 +147,11 @@ function renderVis() {
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("cx", (d, i) => 40 + ((i * 9) % 120)) // improve this spacing algorithm
+        .attr("cx", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // improve this spacing algorithm
         .attr("cy", (d, i) => {
 
 
-            return i + 20
+            return (2 * radius) * Math.floor(i / 10) + radius * 2;
             // if (i < 10) {
             //     return 30;
             // }
@@ -164,11 +168,10 @@ function renderVis() {
             //     return 70;
             // }
         })
-        .attr("r", 2.5) 
+        .attr("r", radius) 
         .attr("fill", "steelblue")
         .attr("opacity", (d) => {
             if (vis.filter == "none") {
-                console.log("hello?");
                 return 1;
             }
             else {
@@ -187,9 +190,9 @@ function renderVis() {
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d, i) => 38.5 + ((i * 9) % 120)) // update algorithm here 
+        .attr("x", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // update algorithm here 
         .attr("y", (d, i) => {
-            return i + 20
+            return (2 * radius) * Math.floor(i / 10) + radius * 2;
             // if (i < 30) {
             //     return 40;
             // }
@@ -201,7 +204,7 @@ function renderVis() {
             // }
         }) 
         .attr("fill", "black")
-        .style("font-size", "2.5px")
+        .style("font-size", "20px")
         .text(d => d.id);
 
     // Draw the paths
@@ -229,6 +232,8 @@ initVis();
 function organizeEdges() {
     let vis = this;
 
+    //Map to be returned; store all edges for each phase of each node
+    //Keys: Nodes, values: sub-dictionary with keys: phaseIDs and values: list of outgoing edges (nodeIDs)
     nodeEdges = new Map();
 
     vis.nodes.forEach(node => {
@@ -236,10 +241,12 @@ function organizeEdges() {
         phaseDictionary = new Map();
         nodeEdges.set(node.id, phaseDictionary)
 
+        //Get all removed, replaced, and instAccess instructions
         node_removed = Array.from(Object.entries(node.removed));
         node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
+        //Store all removed and replaced instructionIDs within this list
         edge_relevant_instructions = [];
 
         for (const instruction of node_removed) {
@@ -250,31 +257,32 @@ function organizeEdges() {
             edge_relevant_instructions.push(instruction[0]);
         }
 
+        //Sort instructions so that we can go through optimization temporally
         edge_relevant_instructions.sort((a, b) => a - b);
-        // console.log("relevant instructions for node", node.id, ":", edge_relevant_instructions);
 
+        //Start phaseNumber at -1 for indexing
         var phaseNumber = -1;
 
         edge_relevant_instructions.forEach(instructionID => {
-            // console.log("instruction:", instructionID);
-            // console.log("node_removed:", node_removed);
-            // console.log("node_replaced:", node_replaced);
 
             instructionPhase = node_instructions[instructionID].phaseFnId;
-            // console.log("instructionPhase:", instructionPhase);
+
+            //Add each initialEdges for each phase somewhere here?
+
             if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
-                //Special Condition for 1st phase; set edges to inital edges.
+                //Special Condition for 1st phase optimization takes place; set edges to inital edges -- might be obsolete in the future
                 if (phaseNumber == -1) {
-                    phaseDictionary.set(instructionPhase, node.initialEdges.slice());                    
+                    phaseDictionary.set(instructionPhase, node.initialEdges.slice());                  
                     phaseNumber += 1;
                 }
 
                 else {
+                    //Get edges from previous phase
                     phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
                     phaseNumber += 1;
                 }
-            // console.log("phaseDictionary after instruction", instructionID, ":", phaseDictionary);
+
             }
 
             if (node_replaced.length != 0) {
@@ -289,7 +297,7 @@ function organizeEdges() {
                     edges[edgePosition] = newValue;
                     phaseDictionary.set(instructionPhase, edges);
                 }
-                // console.log("phaseDictionary after instruction", instructionID, ":", phaseDictionary);
+                
             }
 
             else if (node_removed.length != 0) {
@@ -305,7 +313,6 @@ function organizeEdges() {
 
         })
 
-        //console.log(phaseDictionary);
     })
 
     return nodeEdges;
@@ -322,12 +329,15 @@ function organizeEdges() {
 function determineNodeActiveStatus(nodeEdges) {
     let vis = this;
 
+    //The map to be returned
+    //Keys: Phase IDs, values: set of nodeIDs representing active nodes by phase
     activeNodesByPhase = new Map();
 
     vis.nodes.forEach(node => {
 
         const phaseDictionary = nodeEdges.get(node.id)
 
+        //Look in every phase of each node
         for (const [phase, edges] of phaseDictionary.entries()) {
 
             if (!(Array.from(activeNodesByPhase.keys()).includes(phase))) {
@@ -337,6 +347,7 @@ function determineNodeActiveStatus(nodeEdges) {
 
             }
 
+            //Add each nodeID for every node in the edge
             for (const node of edges) {
 
                 activeNodesByPhase.get(phase).add(node);
