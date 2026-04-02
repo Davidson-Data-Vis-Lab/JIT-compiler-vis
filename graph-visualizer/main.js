@@ -27,6 +27,9 @@ async function initVis() {
     const width = 200;
     const boxHeight = 200;
 
+    //Default view for showing all nodes at full opacity.
+    vis.filter = "none";
+
     vis.svg = d3.select("#chart-area")
         .append("svg")
         .attr('viewBox', [0, 0, width, boxHeight]);
@@ -39,9 +42,10 @@ async function initVis() {
     const markerWidth = markerBoxWidth / 2;
     const markerHeight = markerBoxHeight / 2;
     const arrowPoints = [[0, 0], [0, 20], [20, 10]];
+    vis.phases = [];
 
     //Enables us to turn paths into directional arrows
-    svg.append("defs")
+    vis.svg.append("defs")
         .append("marker")
         .attr("id", "arrow")
         .attr("viewBox", "0 -5 10 10")
@@ -59,14 +63,14 @@ async function initVis() {
     const nodeToEdges = new Map();
    
     // Creating a map with nodes to respective edges array 
-    nodes.forEach(node => {
+    vis.nodes.forEach(node => {
         nodeToEdges.set(node.id, node.edges)
         //console.log(nodeToEdges.get(node.id));
     });
 
     const edges = [];
     // Create an array of arrays that represent all edges
-    nodes.forEach(node => {
+    vis.nodes.forEach(node => {
         var node_edges = nodeToEdges.get(node.id)
         node_edges.forEach(targetNode => {
             if (targetNode != -1) {
@@ -79,7 +83,7 @@ async function initVis() {
     vis.circles = []
     var xCoordinate = 20;
     var yCoordinate = 10;
-    nodes.forEach(node => {
+    vis.nodes.forEach(node => {
         node_coordinates = new Map
         if (xCoordinate >= width) {
             xCoordinate = 20;
@@ -104,9 +108,24 @@ async function initVis() {
         .x(d => d.get("x"))
         .y(d => d.get("y"));
 
-    organizeEdges();
-    renderVis();
+    vis.nodeEdges = organizeEdges();
+    vis.activeNodesByPhase = determineNodeActiveStatus(vis.nodeEdges);
+    createButtons();
+    updateVis();
 
+}
+
+/**
+ * Updates the visualization based on the optimziation phase selected by the user.
+ */
+function updateVis() {
+    let vis = this;
+
+    if (vis.filter != "none") {
+        vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
+    }
+
+    renderVis();
 }
 
 /**
@@ -114,6 +133,9 @@ async function initVis() {
  */
 function renderVis() {
     let vis = this;
+
+    //Remove all previous elements so that we can redraw with new opacity values
+    vis.svg.selectAll("*").remove();
 
     // Drawing circles out onto screen
     vis.svg.selectAll("circle")
@@ -144,7 +166,21 @@ function renderVis() {
         })
         .attr("r", 2.5) 
         .attr("fill", "steelblue")
-        .attr("opacity");
+        .attr("opacity", (d) => {
+            if (vis.filter == "none") {
+                console.log("hello?");
+                return 1;
+            }
+            else {
+
+                if (vis.phaseNodes.has(d.id)) {
+                    return 1;
+                }
+                else {
+                    return 0.1;
+                }
+            }
+        });
 
     vis.svg.selectAll("text")
         .data(vis.nodes)
@@ -186,9 +222,10 @@ initVis();
 /**
  * Creates a dictionary object that tracks the current edges of each node
  * for every optimization phase.
- * 
+ *
  * Returns the dictionary object
  */
+
 function organizeEdges() {
     let vis = this;
 
@@ -197,25 +234,140 @@ function organizeEdges() {
     vis.nodes.forEach(node => {
 
         phaseDictionary = new Map();
-        nodeEdges.set(node.ID, phaseDictionary)
+        nodeEdges.set(node.id, phaseDictionary)
 
-        node_removed = node.removed;
-        node_replaced = node.replaced;
+        node_removed = Array.from(Object.entries(node.removed));
+        node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
         edge_relevant_instructions = [];
 
-        node_removed.keys().forEach(instruction => {
-            edge_relevant_instructions.push(instruction);
-        });
+        for (const instruction of node_removed) {
+            edge_relevant_instructions.push(instruction[0]);
+        }
 
-        node_replaced.keys().forEach(instruction => {
-            edge_relevant_instructions.push(instruction);
-        });
+        for (const instruction of node_replaced) {
+            edge_relevant_instructions.push(instruction[0]);
+        }
 
-        edge_relevant_instructions.sort(a, b => (a - b));
+        edge_relevant_instructions.sort((a, b) => a - b);
+        // console.log("relevant instructions for node", node.id, ":", edge_relevant_instructions);
 
-        //sconsole.log(edge_relevant_instructions);
+        var phaseNumber = -1;
+
+        edge_relevant_instructions.forEach(instructionID => {
+            // console.log("instruction:", instructionID);
+            // console.log("node_removed:", node_removed);
+            // console.log("node_replaced:", node_replaced);
+
+            instructionPhase = node_instructions[instructionID].phaseFnId;
+            // console.log("instructionPhase:", instructionPhase);
+            if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
+
+                //Special Condition for 1st phase; set edges to inital edges.
+                if (phaseNumber == -1) {
+                    phaseDictionary.set(instructionPhase, node.initialEdges.slice());                    
+                    phaseNumber += 1;
+                }
+
+                else {
+                    phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
+                    phaseNumber += 1;
+                }
+            // console.log("phaseDictionary after instruction", instructionID, ":", phaseDictionary);
+            }
+
+            if (node_replaced.length != 0) {
+
+                //Check replaced for the instruction and replace edge
+                const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
+                if (replacedEntry) {
+                    var instruction = replacedEntry[1];
+                    var edgePosition = instruction.position;
+                    var newValue = instruction.to;
+                    var edges = phaseDictionary.get(instructionPhase);
+                    edges[edgePosition] = newValue;
+                    phaseDictionary.set(instructionPhase, edges);
+                }
+                // console.log("phaseDictionary after instruction", instructionID, ":", phaseDictionary);
+            }
+
+            else if (node_removed.length != 0) {
+                const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
+                if (removedEntry) {
+                    var instruction = removedEntry[1];
+                    var removedNode = instruction.nodeId;
+                    var edges = phaseDictionary.get(instructionPhase);
+                    edges.splice(edges.indexOf(removedNode), 1);
+                    phaseDictionary.set(instructionPhase, edges);
+                }
+            }
+
+        })
+
+        //console.log(phaseDictionary);
     })
+
+    return nodeEdges;
 }
 
+
+/**
+ * Determines which nodes are active in each phase and organizes this information
+ * within a dictionary.
+ * 
+ * Returns a dictionary object with keys as phase numbers and values as sets of 
+ * active nodes in that phase.
+ */
+function determineNodeActiveStatus(nodeEdges) {
+    let vis = this;
+
+    activeNodesByPhase = new Map();
+
+    vis.nodes.forEach(node => {
+
+        const phaseDictionary = nodeEdges.get(node.id)
+
+        for (const [phase, edges] of phaseDictionary.entries()) {
+
+            if (!(Array.from(activeNodesByPhase.keys()).includes(phase))) {
+
+                activeNodesByPhase.set(phase, new Set());
+                vis.phases.push(phase);
+
+            }
+
+            for (const node of edges) {
+
+                activeNodesByPhase.get(phase).add(node);
+
+            }
+
+        }
+
+    })
+
+    return activeNodesByPhase;
+
+}
+
+/**
+ * Dynamically creates HTML buttons with event listeners based on the phases within the data.
+ */
+function createButtons() {
+    let vis = this;
+
+    const buttonBox = document.getElementById("button-box");
+
+    vis.phases.forEach(phase => {
+
+        const btn = document.createElement("button");
+        btn.textContent = "Phase " + phase;
+        buttonBox.appendChild(btn);
+
+        btn.addEventListener("click", () => {
+            vis.filter = Number(btn.textContent.split(" ")[1]);
+            updateVis();
+        });
+    });
+}
