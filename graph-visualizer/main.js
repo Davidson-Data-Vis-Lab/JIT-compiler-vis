@@ -62,6 +62,7 @@ async function initVis() {
 
     //Organize data for easier access
     vis.nodes = data.nodes;
+    
     const nodeToEdges = new Map();
    
     // Creating a map with nodes to respective edges array 
@@ -82,33 +83,55 @@ async function initVis() {
     });
 
     // Mapping each node out to equidistance apart 
-    vis.circles = []
-    var xCoordinate = 20;
-    var yCoordinate = 10;
-    vis.nodes.forEach(node => {
-        node_coordinates = new Map
-        if (xCoordinate >= width) {
-            xCoordinate = 20;
-            yCoordinate += 10;
-        }
-        node_coordinates.set("x", xCoordinate);
-        node_coordinates.set("y", yCoordinate);
-        vis.circles.push(node_coordinates)
-        xCoordinate += 10;
-        });
+    // vis.circles = []
+    // var xCoordinate = 20;
+    // var yCoordinate = 10;
+    // vis.nodes.forEach(node => {
+    //     node_coordinates = new Map
+    //     if (xCoordinate >= width) {
+    //         xCoordinate = 20;
+    //         yCoordinate += 10;
+    //     }
+    //     node_coordinates.set("x", xCoordinate);
+    //     node_coordinates.set("y", yCoordinate);
+    //     vis.circles.push(node_coordinates)
+    //     xCoordinate += 10;
+    //     });
     
-    //Create explict links (edges) where source node coordinates are aligned with target node coordinates
-    vis.links = edges
-    .map(([sourcenode, targetnode]) => {
-        const sourcenode_coordinates = vis.circles[sourcenode]
-        const targetnode_coordinates = vis.circles[targetnode]
-        return {source: sourcenode_coordinates, target: targetnode_coordinates}
-    })
+    // //Create explict links (edges) where source node coordinates are aligned with target node coordinates
+    // vis.links = edges
+    // .map(([sourcenode, targetnode]) => {
+    //     const sourcenode_coordinates = vis.circles[sourcenode]
+    //     const targetnode_coordinates = vis.circles[targetnode]
+    //     return {source: sourcenode_coordinates, target: targetnode_coordinates}
+    // })
+    const radius = 35;
+    const cols = 10;
+
+    // Compute actual render coordinates (same formula as renderVis)
+    vis.circles = vis.nodes.map((node, i) => {
+        const cx = (i * (radius * 2) + radius) % (cols * radius * 2);
+        const cy = (2 * radius) * Math.floor(i / cols) + radius * 2;
+        return { x: cx, y: cy };
+    });
+
+    // Build links using real render coordinates
+    vis.links = edges.map(([sourcenode, targetnode]) => {
+        return {
+            source: vis.circles[sourcenode],
+            target: vis.circles[targetnode]
+        };
+    });
+
+    vis.linkPath = d3.linkHorizontal()
+        .x(d => d.x)
+        .y(d => d.y);
+    
 
     // Gives d3 a mapping of how to extract data and create paths
-    vis.linkPath = d3.linkHorizontal()
-        .x(d => d.get("x"))
-        .y(d => d.get("y"));
+    // vis.linkPath = d3.linkHorizontal()
+    //     .x(d => d.get("x"))
+    //     .y(d => d.get("y"));
 
     vis.nodeEdges = organizeEdges();
     vis.activeNodesByPhase = determineNodeActiveStatus(vis.nodeEdges);
@@ -120,11 +143,66 @@ async function initVis() {
 /**
  * Updates the visualization based on the optimziation phase selected by the user.
  */
+// function updateVis() {
+//     let vis = this;
+
+//     if (vis.filter != "none") {
+//         vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
+//     }
+
+//     renderVis();
+// }
 function updateVis() {
     let vis = this;
 
     if (vis.filter != "none") {
         vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
+
+        // Rebuild links for the active phase
+        const phaseEdges = [];
+        vis.nodes.forEach(node => {
+            const phaseDictionary = vis.nodeEdges.get(node.id);
+            // Find the most recent phase at or before the selected phase
+            let activeEdges = null;
+
+            const phases = Array.from(phaseDictionary.keys())
+            .map(Number)
+            .sort((a, b) => a - b);
+
+            for (const p of phases) {
+            if (p <= vis.filter) activeEdges = phaseDictionary.get(p);
+            else break;
+            }
+
+            if (activeEdges === null) activeEdges = node.initialEdges;
+            // Fall back to initialEdges if no phase entry exists yet
+            if (activeEdges === null) {
+                activeEdges = node.initialEdges;
+            }
+            activeEdges.forEach(targetNode => {
+                if (targetNode !== -1) {
+                    phaseEdges.push([node.id, targetNode]);
+                }
+            });
+        });
+
+        vis.links = phaseEdges.map(([sourcenode, targetnode]) => ({
+            source: vis.circles[sourcenode],
+            target: vis.circles[targetnode]
+        }));
+
+    } else {
+        // "none" filter: use final edges
+        const allEdges = [];
+        vis.nodes.forEach(node => {
+            node.edges.forEach(targetNode => {
+                if (targetNode !== -1) allEdges.push([node.id, targetNode]);
+            });
+        });
+        vis.links = allEdges.map(([s, t]) => ({
+            source: vis.circles[s],
+            target: vis.circles[t]
+        }));
     }
 
     renderVis();
@@ -147,11 +225,13 @@ function renderVis() {
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("cx", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // improve this spacing algorithm
-        .attr("cy", (d, i) => {
+        .attr("cx", (d, i) => vis.circles[i].x)
+        .attr("cy", (d, i) => vis.circles[i].y)
+        // .attr("cx", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // improve this spacing algorithm
+        // .attr("cy", (d, i) => {
 
 
-            return (2 * radius) * Math.floor(i / 10) + radius * 2;
+            // return (2 * radius) * Math.floor(i / 10) + radius * 2;
             // if (i < 10) {
             //     return 30;
             // }
@@ -167,7 +247,7 @@ function renderVis() {
             // else {
             //     return 70;
             // }
-        })
+        // })
         .attr("r", radius) 
         .attr("fill", "steelblue")
         .attr("opacity", (d) => {
@@ -190,9 +270,11 @@ function renderVis() {
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // update algorithm here 
-        .attr("y", (d, i) => {
-            return (2 * radius) * Math.floor(i / 10) + radius * 2;
+        .attr("x", (d, i) => vis.circles[i].x)
+        .attr("y", (d, i) => vis.circles[i].y)
+        // .attr("x", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // update algorithm here 
+        // .attr("y", (d, i) => {
+            // return (2 * radius) * Math.floor(i / 10) + radius * 2;
             // if (i < 30) {
             //     return 40;
             // }
@@ -202,7 +284,7 @@ function renderVis() {
             // else {
             //     return 50;
             // }
-        }) 
+        // }) 
         .attr("fill", "black")
         .style("font-size", "20px")
         .text(d => d.id);
@@ -246,6 +328,12 @@ function organizeEdges() {
         node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
+        const first_instruction = Object.entries(node_instructions)[0][0];
+        const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
+        console.log(first_instruction_phase);
+
+        phaseDictionary.set(first_instruction_phase, node.initialEdges.slice()); 
+
         //Store all removed and replaced instructionIDs within this list
         edge_relevant_instructions = [];
 
@@ -261,7 +349,7 @@ function organizeEdges() {
         edge_relevant_instructions.sort((a, b) => a - b);
 
         //Start phaseNumber at -1 for indexing
-        var phaseNumber = -1;
+        var phaseNumber = 0;
 
         edge_relevant_instructions.forEach(instructionID => {
 
@@ -271,17 +359,17 @@ function organizeEdges() {
 
             if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
-                //Special Condition for 1st phase optimization takes place; set edges to inital edges -- might be obsolete in the future
-                if (phaseNumber == -1) {
-                    phaseDictionary.set(instructionPhase, node.initialEdges.slice());                  
-                    phaseNumber += 1;
-                }
+                // //Special Condition for 1st phase optimization takes place; set edges to inital edges -- might be obsolete in the future
+                // if (phaseNumber == -1) {
+                //     phaseDictionary.set(instructionPhase, node.initialEdges.slice());                  
+                //     phaseNumber += 1;
+                // }
 
-                else {
+                
                     //Get edges from previous phase
                     phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
                     phaseNumber += 1;
-                }
+                
 
             }
 
@@ -348,9 +436,11 @@ function determineNodeActiveStatus(nodeEdges) {
             }
 
             //Add each nodeID for every node in the edge
-            for (const node of edges) {
+            for (const target_node of edges) {
 
-                activeNodesByPhase.get(phase).add(node);
+                activeNodesByPhase.get(phase).add(target_node);
+                activeNodesByPhase.get(phase).add(node.id);
+
 
             }
 
