@@ -300,6 +300,53 @@ function renderVis() {
         .attr("stroke", "#000000")
         .attr("stroke-width", 0.5)
         .attr("marker-end", "url(#arrow)");
+
+    //Tooltip for hovering over nodes
+
+    const nodes = vis.svg.selectAll(".node");
+    const edges = vis.svg.selectAll(".edge");
+
+    nodes
+        .on('mouseover', (event, d) => {
+
+            const nodeID = d.id;
+
+            const nodeXPosition = vis.circles[nodeID]["x"];
+            const nodeYPosition = vis.circles[nodeID]["y"];
+            
+            vis.iterableEdges = edges._groups[0];
+
+            vis.iterableEdges.forEach(edge => {
+
+                edge.setAttribute("stroke-width", 0);
+
+                const edgeSourceXPosition = edge.__data__["source"]["x"];
+                const edgeSourceYPosition = edge.__data__["source"]["y"];
+
+                const edgeTargetXPosition = edge.__data__["target"]["x"];
+                const edgeTargetYPosition = edge.__data__["target"]["y"];
+
+                if ((edgeSourceXPosition == nodeXPosition && edgeSourceYPosition == nodeYPosition) ||
+                    edgeTargetXPosition == nodeXPosition && edgeTargetYPosition == nodeYPosition) {
+                        
+                        edge.setAttribute("stroke-width", 2.5);
+
+                }
+
+            })
+
+        })
+        .on('mouseleave', () => {
+
+            vis.iterableEdges.forEach(edge => {
+
+                edge.setAttribute("stroke-width", 0.5);
+                console.log(edge);
+
+            })
+
+        })
+        
 }
 
 initVis();
@@ -328,10 +375,11 @@ function organizeEdges() {
         node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
+        //Get the very first instruction for each node and determine what phase it is part of
         const first_instruction = Object.entries(node_instructions)[0][0];
         const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
-        console.log(first_instruction_phase);
 
+        //Set the intial edges for the first phase that the node is created in
         phaseDictionary.set(first_instruction_phase, node.initialEdges.slice()); 
 
         //Store all removed and replaced instructionIDs within this list
@@ -355,8 +403,6 @@ function organizeEdges() {
 
             instructionPhase = node_instructions[instructionID].phaseFnId;
 
-            //Add each initialEdges for each phase somewhere here?
-
             if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
                 // //Special Condition for 1st phase optimization takes place; set edges to inital edges -- might be obsolete in the future
@@ -366,9 +412,9 @@ function organizeEdges() {
                 // }
 
                 
-                    //Get edges from previous phase
-                    phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
-                    phaseNumber += 1;
+                //Get edges from previous phase
+                phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
+                phaseNumber += 1;
                 
 
             }
@@ -438,9 +484,10 @@ function determineNodeActiveStatus(nodeEdges) {
             //Add each nodeID for every node in the edge
             for (const target_node of edges) {
 
+                //Add each target node
                 activeNodesByPhase.get(phase).add(target_node);
+                //Add the source node as well
                 activeNodesByPhase.get(phase).add(node.id);
-
 
             }
 
