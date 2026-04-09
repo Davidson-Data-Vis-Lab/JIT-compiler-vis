@@ -161,24 +161,27 @@ function updateVis() {
         // Rebuild links for the active phase
         const phaseEdges = [];
         vis.nodes.forEach(node => {
-            const phaseDictionary = vis.nodeEdges.get(node.id);
-            // Find the most recent phase at or before the selected phase
-            let activeEdges = null;
-
-            const phases = Array.from(phaseDictionary.keys())
-            .map(Number)
-            .sort((a, b) => a - b);
-
-            for (const p of phases) {
-            if (p <= vis.filter) activeEdges = phaseDictionary.get(p);
-            else break;
+            // Only process edges for nodes that are active in this phase
+            if (!vis.phaseNodes.has(node.id)) {
+                return; // Skip this node if it's not active
             }
-
-            if (activeEdges === null) activeEdges = node.initialEdges;
-            // Fall back to initialEdges if no phase entry exists yet
+            
+            const phaseDictionary = vis.nodeEdges.get(node.id);
+            let activeEdges = null;
+        
+            const phases = Array.from(phaseDictionary.keys())
+                .map(Number)
+                .sort((a, b) => a - b);
+        
+            for (const p of phases) {
+                if (p <= vis.filter) activeEdges = phaseDictionary.get(p);
+                else break;
+            }
+        
             if (activeEdges === null) {
                 activeEdges = node.initialEdges;
             }
+            
             activeEdges.forEach(targetNode => {
                 if (targetNode !== -1) {
                     phaseEdges.push([node.id, targetNode]);
