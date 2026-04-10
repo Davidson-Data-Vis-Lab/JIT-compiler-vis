@@ -22,9 +22,9 @@ async function loadData() {
 async function initVis() {
     let vis = this;
 
-    const data = await loadData();
+    vis.data = await loadData();
 
-    const width = 900;
+    const width = 750;
     const boxHeight = 1000;
 
     //Default view for showing all nodes at full opacity.
@@ -44,7 +44,11 @@ async function initVis() {
     const markerWidth = markerBoxWidth / 2;
     const markerHeight = markerBoxHeight / 2;
     const arrowPoints = [[0, 0], [0, 20], [20, 10]];
+    vis.tooltipPadding = 15;
+
     vis.phases = [];
+    vis.phaseIDs = [];
+     getPhases();
 
     //Enables us to turn paths into directional arrows
     vis.svg.append("defs")
@@ -61,7 +65,7 @@ async function initVis() {
         .attr("fill", "#ff0000");
 
     //Organize data for easier access
-    vis.nodes = data.nodes;
+    vis.nodes = vis.data.nodes;
     
     const nodeToEdges = new Map();
    
@@ -304,13 +308,28 @@ function renderVis() {
         .attr("stroke-width", 0.5)
         .attr("marker-end", "url(#arrow)");
 
-    //Tooltip for hovering over nodes
+    //Hover effect for nodes
 
     const nodes = vis.svg.selectAll(".node");
     const edges = vis.svg.selectAll(".edge");
 
     nodes
         .on('mouseover', (event, d) => {
+
+            //Calculate alive_status for tooltip
+            const alive_status = 
+                vis.filter != "none"
+                    ? vis.phaseNodes.has(d.id) ? "True" : "False"
+                : "True"
+
+            const nodeEdges = 
+                //This needs to be updated; what edges is the default view showing?
+                vis.filter != "none"
+                    //Check if node actually has
+                    ? Array.from(vis.nodeEdges.get(d.id).keys()).includes(vis.filter)
+                        ? vis.nodeEdges.get(d.id).get(vis.filter)
+                        : "No edges within this phase"
+                    : d.initialEdges;
 
             const nodeID = d.id;
 
@@ -338,15 +357,28 @@ function renderVis() {
 
             })
 
+            d3.select('#tooltip')
+                .style('display', 'block')
+                .style('left', (event.pageX + vis.tooltipPadding) + 'px')
+                .style('top', (event.pageY + vis.tooltipPadding) + 'px')
+                .html(`
+                    <ul>
+                        <li>Opcode - ${d.opcode + ":" + d.mnemonic} </li>
+                        <li>Alive? - ${alive_status}</li>
+                        <li>Edges - ${nodeEdges}</li>
+                    </ul>
+                `);
+
         })
         .on('mouseleave', () => {
 
             vis.iterableEdges.forEach(edge => {
 
                 edge.setAttribute("stroke-width", 0.5);
-                console.log(edge);
 
             })
+
+            d3.select('#tooltip').style('display', 'none');
 
         })
         
@@ -480,7 +512,6 @@ function determineNodeActiveStatus(nodeEdges) {
             if (!(Array.from(activeNodesByPhase.keys()).includes(phase))) {
 
                 activeNodesByPhase.set(phase, new Set());
-                vis.phases.push(phase);
 
             }
 
@@ -510,15 +541,49 @@ function createButtons() {
 
     const buttonBox = document.getElementById("button-box");
 
-    vis.phases.forEach(phase => {
+    for (let i = 0; i < vis.phases.length; i++) {
+
+        split_phase = vis.phases[i].split("::");
+
+        const phaseName = (split_phase[3]);
+
+        const phaseId = vis.phaseIDs[i];
 
         const btn = document.createElement("button");
-        btn.textContent = "Phase " + phase;
+        btn.textContent = "Phase " + phaseId + ": " + phaseName;
+        btn.className = "phase_btn";
         buttonBox.appendChild(btn);
 
         btn.addEventListener("click", () => {
-            vis.filter = Number(btn.textContent.split(" ")[1]);
+            //vis.filter = Number(btn.textContent.split(" ")[1]);
+            var phaseID = btn.textContent.split(" ")[1];
+            //Remove ending colon
+            phaseID = phaseID.substring(0, phaseID.length - 1);
+            vis.filter = Number(phaseID);
             updateVis();
         });
-    });
+    };
+}
+
+/**
+ * Parses the IR file to create a list of all phase IDs found within the file.
+ * 
+ * Returns a list with all phase IDs within the IR.
+ */
+function getPhases() {
+    let vis = this;
+
+    const functionIds = Object.entries(vis.data["fnId2Name"]);
+
+    functionIds.forEach(functionId => {
+
+        if (functionId[1].includes("Phase::Run")) {
+
+            vis.phaseIDs.push(functionId[0]);
+            vis.phases.push(functionId[1]);
+
+        }
+
+    })
+
 }
