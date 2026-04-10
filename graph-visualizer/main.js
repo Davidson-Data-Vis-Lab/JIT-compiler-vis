@@ -410,6 +410,12 @@ function organizeEdges() {
         node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
+        vis.phaseIDs.forEach(phaseID => {
+
+            phaseDictionary.set(phaseID, []);
+
+        });
+
         //Get the very first instruction for each node and determine what phase it is part of
         const first_instruction = Object.entries(node_instructions)[0][0];
         const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
@@ -436,22 +442,18 @@ function organizeEdges() {
 
         edge_relevant_instructions.forEach(instructionID => {
 
-            instructionPhase = node_instructions[instructionID].phaseFnId;
+            const instructionPhase = node_instructions[instructionID].phaseFnId;
 
-            if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
+            console.log(instructionPhase);
 
-                // //Special Condition for 1st phase optimization takes place; set edges to inital edges -- might be obsolete in the future
-                // if (phaseNumber == -1) {
-                //     phaseDictionary.set(instructionPhase, node.initialEdges.slice());                  
-                //     phaseNumber += 1;
-                // }
+            if (phaseDictionary.get(instructionPhase) == []) {
 
-                
                 //Get edges from previous phase
                 phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
                 phaseNumber += 1;
-                
 
+                console.log(phaseDictionary.get(instructionPhase));
+                
             }
 
             if (node_replaced.length != 0) {
@@ -483,6 +485,14 @@ function organizeEdges() {
         })
 
     })
+
+    //Loop through all nodes
+    //For each node loop through phase
+    //vis.phaseIDs  -> Convert to a list
+    
+
+
+
 
     return nodeEdges;
 }
