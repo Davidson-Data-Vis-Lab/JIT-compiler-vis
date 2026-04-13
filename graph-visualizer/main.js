@@ -234,27 +234,6 @@ function renderVis() {
         .attr("class", "node")
         .attr("cx", (d, i) => vis.circles[i].x)
         .attr("cy", (d, i) => vis.circles[i].y)
-        // .attr("cx", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // improve this spacing algorithm
-        // .attr("cy", (d, i) => {
-
-
-            // return (2 * radius) * Math.floor(i / 10) + radius * 2;
-            // if (i < 10) {
-            //     return 30;
-            // }
-            // if (i < 20) {
-            //     return 40;
-            // }
-            // else if (i < 30) {
-            //     return 50;
-            // }
-            // else if (i < 40) {
-            //     return 60;
-            // }
-            // else {
-            //     return 70;
-            // }
-        // })
         .attr("r", radius) 
         .attr("fill", "steelblue")
         .attr("opacity", (d) => {
@@ -279,23 +258,11 @@ function renderVis() {
         .attr("class", "label")
         .attr("x", (d, i) => vis.circles[i].x)
         .attr("y", (d, i) => vis.circles[i].y)
-        // .attr("x", (d, i) => (i * (radius * 2) + radius) % (10 * radius * 2)) // update algorithm here 
-        // .attr("y", (d, i) => {
-            // return (2 * radius) * Math.floor(i / 10) + radius * 2;
-            // if (i < 30) {
-            //     return 40;
-            // }
-            // else if (i < 60) {
-            //     return 45;
-            // }
-            // else {
-            //     return 50;
-            // }
-        // }) 
         .attr("fill", "black")
         .style("font-size", "20px")
         .text(d => d.id);
-
+    
+        
     // Draw the paths
     vis.svg.selectAll("path.edge")
         .data(vis.links)
@@ -305,8 +272,36 @@ function renderVis() {
         .attr("d", vis.linkPath)
         .attr("fill", "none")
         .attr("stroke", "#000000")
-        .attr("stroke-width", 0.5)
-        .attr("marker-end", "url(#arrow)");
+        .attr("stroke-width", 0.5);
+        // .attr('d', d3.line()(arrowPoints))
+        // .attr("marker-end", "url(#arrow)");
+// const arrow = 
+//         vis.svg.selectAll
+//         .data(vis.links)
+        
+    
+    vis.svg.selectAll("arrows")
+        .data(vis.links)
+        .enter()
+        .append("polygon")
+        .attr("class", "arrow")
+        .attr("points", (d) => {
+            const targetNode = d.target;
+            const sourceNode = d.source;
+            const Sx = sourceNode.x;
+            const x = targetNode.x;
+            const y = targetNode.y;
+            const upper  = `${x - 5},${y - 5}`;
+            const lower  = `${x - 5},${y + 5}`;
+            const center = `${x},${y}`;
+            console.log("hello")
+            if (Sx > x) {
+                return `${x + 5},${y - 5}` + " " + `${x + 5},${y + 5}` + " " + `${x},${y}`;
+            }
+            else 
+            return upper + " " + lower + " " + center;
+        });
+
 
     //Hover effect for nodes
 
@@ -314,66 +309,91 @@ function renderVis() {
     const edges = vis.svg.selectAll(".edge");
 
     nodes
-        .on('mouseover', (event, d) => {
-
-            //Calculate alive_status for tooltip
-            const alive_status = 
-                vis.filter != "none"
-                    ? vis.phaseNodes.has(d.id) ? "True" : "False"
-                : "True"
-
-            var nodeEdges = 
-                //This needs to be updated; what edges is the default view showing?
-                vis.filter != "none"
-                    //Check if node actually has
-                    ? Array.from(vis.nodeEdges.get(d.id).keys()).includes(vis.filter)
-                        ? vis.nodeEdges.get(d.id).get(vis.filter)
-                        : "This node currently has no directed edges."
-                    : d.initialEdges;
-
-            const nodeID = d.id;
-
-            if (nodeEdges.length == 0) {
-                nodeEdges = "This node currently has no directed edges."
-            }
-
-            const nodeXPosition = vis.circles[nodeID]["x"];
-            const nodeYPosition = vis.circles[nodeID]["y"];
-            
-            vis.iterableEdges = edges._groups[0];
-
-            vis.iterableEdges.forEach(edge => {
-
-                edge.setAttribute("stroke-width", 0);
-
-                const edgeSourceXPosition = edge.__data__["source"]["x"];
-                const edgeSourceYPosition = edge.__data__["source"]["y"];
-
-                const edgeTargetXPosition = edge.__data__["target"]["x"];
-                const edgeTargetYPosition = edge.__data__["target"]["y"];
-
-                if ((edgeSourceXPosition == nodeXPosition && edgeSourceYPosition == nodeYPosition) ||
-                    edgeTargetXPosition == nodeXPosition && edgeTargetYPosition == nodeYPosition) {
-                        
-                        edge.setAttribute("stroke-width", 2.5);
-
-                }
-
+    .on('mouseover', (event, d) => {
+        // Calculate alive status
+        const alive_status = 
+            vis.filter != "none"
+                ? vis.phaseNodes.has(d.id) ? "True" : "False"
+                : "True";
+    
+        // Get current edges
+        var nodeEdges = 
+            vis.filter != "none"
+                ? Array.from(vis.nodeEdges.get(d.id).keys()).includes(vis.filter)
+                    ? vis.nodeEdges.get(d.id).get(vis.filter)
+                    : []
+                : d.edges;
+    
+        // Calculate incoming edges
+        const incomingEdges = vis.nodes
+            .filter(node => {
+                const currentEdges = vis.filter != "none" && vis.nodeEdges.has(node.id)
+                    ? vis.nodeEdges.get(node.id).get(vis.filter) || []
+                    : node.edges;
+                return currentEdges.includes(d.id);
             })
-
-            d3.select('#tooltip')
-                .style('display', 'block')
-                .style('left', (event.pageX + vis.tooltipPadding) + 'px')
-                .style('top', (event.pageY + vis.tooltipPadding) + 'px')
-                .html(`
-                    <ul>
-                        <li>Opcode - ${d.opcode + ":" + d.mnemonic} </li>
-                        <li>Alive? - ${alive_status}</li>
-                        <li>Edges - ${nodeEdges}</li>
-                    </ul>
-                `);
-
-        })
+            .map(node => node.id);
+    
+        // Count optimization operations
+        const addedCount = Object.keys(d.added).length;
+        const removedCount = Object.keys(d.removed).length;
+        const replacedCount = Object.keys(d.replaced).length;
+    
+        // Get creation phase
+        const firstInstruction = Object.keys(d.instAccess)[0];
+        const creationPhase = firstInstruction 
+            ? d.instAccess[firstInstruction].phaseFnId 
+            : "N/A";
+    
+        // Format edge lists
+        const outgoingEdgesStr = nodeEdges.length > 0 
+            ? nodeEdges.join(", ") 
+            : "None";
+        const incomingEdgesStr = incomingEdges.length > 0 
+            ? incomingEdges.join(", ") 
+            : "None";
+        const initialEdgesStr = d.initialEdges.length > 0 
+            ? d.initialEdges.join(", ") 
+            : "None";
+    
+        // Highlight edges
+        const nodeXPosition = vis.circles[d.id]["x"];
+        const nodeYPosition = vis.circles[d.id]["y"];
+        
+        vis.iterableEdges = edges._groups[0];
+        vis.iterableEdges.forEach(edge => {
+            edge.setAttribute("stroke-width", 0);
+            const edgeSourceXPosition = edge.__data__["source"]["x"];
+            const edgeSourceYPosition = edge.__data__["source"]["y"];
+            const edgeTargetXPosition = edge.__data__["target"]["x"];
+            const edgeTargetYPosition = edge.__data__["target"]["y"];
+    
+            if ((edgeSourceXPosition == nodeXPosition && edgeSourceYPosition == nodeYPosition) ||
+                (edgeTargetXPosition == nodeXPosition && edgeTargetYPosition == nodeYPosition)) {
+                edge.setAttribute("stroke-width", 2.5);
+            }
+        });
+    
+        d3.select('#tooltip')
+            .style('display', 'block')
+            .style('left', (event.pageX + vis.tooltipPadding) + 'px')
+            .style('top', (event.pageY + vis.tooltipPadding) + 'px')
+            .html(`
+                <ul>
+                    <li><strong>Node ID:</strong> ${d.id}</li>
+                    <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+                    <li><strong>Alive?:</strong> ${alive_status}</li>
+                    <li><strong>Size:</strong> ${d.size} bytes</li>
+                    <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+                    <hr>
+                    <li><strong>Outgoing Edges:</strong> [${outgoingEdgesStr}]</li>
+                    <li><strong>Incoming Edges:</strong> [${incomingEdgesStr}]</li>
+                    <li><strong>Initial Edges:</strong> [${initialEdgesStr}]</li>
+                    <hr>
+                    <li><strong>Instructions Accessed:</strong> ${Object.keys(d.instAccess).length}</li>
+                </ul>
+            `);
+    })
         .on('mouseleave', () => {
 
             vis.iterableEdges.forEach(edge => {
@@ -550,6 +570,9 @@ function organizeEdges() {
 function determineNodeActiveStatus(nodeEdges) {
     let vis = this;
 
+
+    
+
     //The map to be returned
     //Keys: Phase IDs, values: set of nodeIDs representing active nodes by phase
     activeNodesByPhase = new Map();
@@ -596,6 +619,8 @@ function determineNodeActiveStatus(nodeEdges) {
 function createButtons() {
     let vis = this;
 
+
+
     const buttonBox = document.getElementById("button-box");
 
     for (let i = 0; i < vis.phases.length; i++) {
@@ -629,6 +654,8 @@ function createButtons() {
  */
 function getPhases() {
     let vis = this;
+
+
 
     const functionIds = Object.entries(vis.data["fnId2Name"]);
 
