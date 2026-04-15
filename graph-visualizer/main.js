@@ -303,7 +303,7 @@ function renderVis() {
         const optimizedPhasesStr =
             optimizedPhases.size ? Array.from(optimizedPhases).sort((a,b)=>a-b).join(", ") : "None";  
     
-        const nodeXPosition = vis.circleq[d.id]["x"];
+        const nodeXPosition = vis.circles[d.id]["x"];
         const nodeYPosition = vis.circles[d.id]["y"];
         
         vis.iterableEdges = edges._groups[0];
@@ -586,7 +586,7 @@ function createButtons() {
  */
 function getPhases() {
     let vis = this;
-    
+
     const functionIds = Object.entries(vis.data["fnId2Name"]);
 
     functionIds.forEach(functionId => {
