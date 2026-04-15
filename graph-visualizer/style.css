@@ -32,6 +32,12 @@
     background-color: #00b3b3;
 }
 
+.phase_btn.selected {
+    background-color: #00b3b3;
+    border: 2px solid #006666;
+    color: white;
+  }
+
 #mainFlexBox {
     display: flex;
     flex-direction: row;
