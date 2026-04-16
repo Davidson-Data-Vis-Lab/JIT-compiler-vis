@@ -21,7 +21,52 @@ TODO:
 
 ## Tues, April 14 - Met with Dr. Lim
 
+We validated the GraphBuilderPhase in the IR file, but not against his image (haven't validated the others). Our blue nodes are alive during the phase and the grey means not alive. 
 
+
+Discussion reveals that our definition of "alive" (which we considered "connected by edges") was wrong and "alive" is defined by type. Our other information seems correct (op code, node, size, created). **At the end of compilation, we know nodes with ids 0-35 should be alive (more or less) and 36+ should not be alive.**
+
+
+TL says that "dead" means the node was removed from the IR. If a node is alive at the end, that means it was converted into machine instructions. Throughout the process, nodes have opcodes and when they are alive, that means we are using the node and thus, using the opcode. 
+
+Somewhere in the node's instructions, they will have the instruction "DEAD," which means the memory is wiped and replaced with 0s. 
+  * Example: Node 92 is actually dead, dead in phase 142962 so the InstructionSelectionPhase.
+  * Every instruction has a type. Everything with type 3 "KILL" means the node is dead
+  * Theoretically, every 1st instAccess for a node should be type 7 "CREATE"
+  * Here's the [**Table of Access Types**](https://github.com/hlim1/JITCIRModeler/blob/code_fix/README.md#access-types)
+
+TL reiterates: "We're interested in what phase did what activity on the node. This can help id which phase caused the killing (possibly incorrectly)."
+
+After the type:3 instruction, there could be other  instructions used for memory overwriting and cleaning. *Can see 4's (value change), 1's (removal), or 5's (read) after 3's.*
+  * Problematic of we see 0s or 7s after a 3 --> could mean that the compiler is reusing the memory location and not recognizing that it's a new node that's reusing the location.
+
+TL: "Optimizer traverses the graph many times until it realizes there are no more optimizations to do."
+  * The edges have several meanings: could mean control flow or could mean data flow. Depends on Sea of Nodes or SAA (which is CFG).
+  * BUT THE EDGE DIRECTION IS STILL USEFUL! Shows what the node value is returning do, shows how data is flowing. Likes both outgoing and incoming edges.
+
+**For graph layout:** would be nice if we could support laying out the Sea of Nodes or SSA (CFG) or data flow. Might have different layout algorithms.
+
+**Unknown**: node 48 has 2 type:3 instructions. It was somehow wiped, and now we're trying to wipe again. *Not sure why.* Between the 3's there are 2x1's, 3x4's, and 2x5's types. 
+
+TODO:
+* Make the phase fill (for the selected button) persistent so I know what phase I'm looking at once I move my mouse away
+* Fix the killed field based on type: 3
+
+## Thurs, April 9 - Group meeting
+We reviewed T&E's current visualization. I gave feedback on things to fix before we meet with Dr. Lim next week.
+
+TODO:
+* Rename existing "tooltip" in code to "edge-view" (or similar)
+* Make [tooltip](https://docs.google.com/document/d/1Bg9b-rQukDJE4lqDtjT938lENsxKvFe475PhgsCuaBE/edit?tab=t.0#heading=h.h4o0crisufls) (i.e., a hover box) that shows data from the IR
+  * We're using this for debugging/confirming accuracy so whatever fields you think are most useful
+  * We thought likely mnemonic/op code, initial edges, removed edges, replaced edges
+* Add directionality to edges (and ask about what the directions mean)
+* Add to the [Questions Page](https://docs.google.com/document/d/13lQUKRDBjBLTygpteZJSBBbJ7kQ6HGnPasy88-a9B0w/edit?tab=t.0)
+* Dr. Williams will get the code up on GitHub.io
+
+
+## Tues, April 7 - No meeting
+Tuesday followed Monday schedule, so no meeting.
 
 ## Thurs, April 2 - Group Meeting
 T&E are updating KPW about the programming they have done for the visualization. 
