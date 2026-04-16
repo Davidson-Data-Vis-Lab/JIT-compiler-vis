@@ -1,5 +1,24 @@
 # Agenda
 
+## Thurs, April 16 - Met with Ellora (Taft away)
+Checking alive/not. Type 3
+
+TODO:
+* Add code to determine which phase the node was created and which phase the node was killed (by looking at instruction type:7 (created) and type:3 (killed) and checking the phaseFnId)
+* Verify our visualization against IR file.
+* Nitpicky changes to make
+  * Change blue background to light blue
+  * Change location of node ID text to up a little bit and left a little bit
+  * Like that the arrows are red (easy to see) but they need to be bigger
+  * Move tooltip to side bar (make sure that it's obvious what node I'm looking at) -- I would make the outline slightly heavier (by 3 px) and I would add color to the node (so everything is light blue if alive, but if I'm looking at the node, then it's medium blue)
+  * MEREGE THAT BRANCH WITH MAIN
+
+* Next phase: explore graph drawing algorithms. Sugiyama, others that y'all presented. 
+* Review the questions doc for people in interviews: https://docs.google.com/document/d/12oJefpEDQESdi6lroOaqXBC7Zy78PaEEyOAMFsbw__Y/edit?usp=drive_link
+
+## Tues, April 14 - Met with Dr. Lim
+
+
 ## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)\
 
 Agenda:
