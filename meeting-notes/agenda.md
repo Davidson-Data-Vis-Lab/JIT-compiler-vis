@@ -15,6 +15,8 @@ TODO:
   * MEREGE THAT BRANCH WITH MAIN
 
 * Next phase: explore graph drawing algorithms. Sugiyama, others that y'all presented. 
+  * Example: Sugiyama style d3 code: https://erikbrinkman.github.io/d3-dag/#examples
+  * Another example: https://codepen.io/brinkbot/pen/oNQwNRv
 * Review the questions doc for people in interviews: https://docs.google.com/document/d/12oJefpEDQESdi6lroOaqXBC7Zy78PaEEyOAMFsbw__Y/edit?usp=drive_link
 
 ## Tues, April 14 - Met with Dr. Lim
