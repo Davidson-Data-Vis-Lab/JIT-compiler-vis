@@ -1,5 +1,6 @@
 # Agenda
 
+
 ## Thurs, April 16 - Met with Ellora (Taft away)
 Checking alive/not. Type 3
 
@@ -21,22 +22,44 @@ TODO:
 ## Tues, April 14 - Met with Dr. Lim
 
 
-## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)\
+
+## Thurs, April 2 - Group Meeting
+T&E are updating KPW about the programming they have done for the visualization. 
+
+Goal: make something relatively easily that helps us understand the dataset. 
+Goal: makes sure the code is flexible enough to be modified for new datasets.
+
+Updates:
+* We think there's a bug with initial edges. TODO on Tuesday (which is a Monday schedule) is fix this bug and make sure organizeEdges() works correctly.
+* Ensure the other data-cleaning functions are correct
+* Add the edges to the visualization (will look like a hairball). Then try to add a hover effect so if we hover over a node, we see all outgoing edges (or add a hover effect on an edge so that we can see the edge and nodes it connects). Can do this by adding an outline around the nodes and increasing the thickness of the edge and color of the edge (make the other edges lighter and thinner)
+
+## Tues, March 30 - Individual meetings 
+Taft and Ellora presented the different graph layout styles and techniques that they researched (my [notes](https://docs.google.com/document/d/1NkDcMBiCtUrvxlRtBJj7Umh8a8dw95E7nx9EhvBm8CI/edit?usp=sharing)). We discussed potentially using Sugiyama layout or a 3-D layout, several others. Ellora had the foresight to consider how we could compare different phases so she proposed radar charts. Taft brought up circle packing and 3-D layouts, which could work but have constraints (circe packing needs to be a hierarchy, 3-D is tricky in 2-D). However, the 3-D idea is probably most intuitive if we can do it well. Another alternative was the idea to lay out the phases sequentially. 
+
+## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)
+
 
 Agenda:
 * Updates since last time
   * Taft and Ellora worked on [programming a visualization](https://github.com/Davidson-Data-Vis-Lab/JIT-compiler-vis/tree/tool-building), to get their feet wet and to start brainstorming
-    * Notes
+    * We bound the data to the circles and added text elements to show the ID for each node (circle). 
+	* TODO (optional, can be later work):
+    	* Figure out the `cx` spacing for the circles and text so that we see all 93 nodes in a nice layout
+       	* Add node numbers (done, minor editing needed)
+       	* Add buttons to show/hide phases. Buttons should be below the rows of nodes. If I click on a button like button "Phase 8", all of the nodes that are alive in phase 8 should have `opacity: 100%` and all other nodes should have `opacity: 50%`. For now, only allow for one phase to be on/off at a time.
   * Dr. Williams nearly completed the IRB application 
-    * Emails, scripts for interviews, details
+    * Emails, [scripts for interviews](https://docs.google.com/document/d/12oJefpEDQESdi6lroOaqXBC7Zy78PaEEyOAMFsbw__Y/edit?usp=sharing), details
+    * T&E can review interview questions and add comments, if desired. Since these will be semi-structured interviews, we can add additional questions as we think of them (or if they come up in the interview).
     * Added Dr. Lim so that he can join interviews. He needs to complete HSIRB training (human-subjects training)
       * Optional for students
 
-  * Keep building over the next week. Individual code review on Tuesday -- I'm looking for a short recap of relevant visualization/graph drawing techinques and sketches of how you think we could use some of these techniques in our visualization.
+  * Keep building over the next week. Individual code review on **Tuesday, March 31** -- I'm looking for a short recap of relevant visualization/graph drawing techniques and sketches of how you think we could use some of these techniques in our visualization.
     * Expected time: 3-4 hours to look up techniques and makes slides, 1-2 hours to make sketches.
     * For example, one we used in [Lab 8 was the Force-Directed Layout](https://docs.google.com/document/d/1aZvdt_JhqttjF-AIbYyCH_p7IgqszKaOBayk_DcrS9A/edit?tab=t.0#heading=h.74fvo7160ixj). How could we use this code? Why would it work or why would it be a poor choice?
     * **Deliverables: quick presentation of 3 types of graph visualizations plus at least 1 technique for graph drawing (review the [Wikipedia article](https://en.wikipedia.org/wiki/Graph_drawing#:~:text=In%20the%20case%20of%20directed,adjacency%20matrix%20of%20the%20graph), especially the Layout Methods and Application-Specific Graph Drawings sections).**
         * All 4 of your choices (3 graph vises and 1 drawing technique) should be reasonable for our dataset -- this will require some reviewing and researching on your part. For example, arc diagrams would *not* be a reasonable choice for this dataset.
+        * You two can have up to 2 of the 4 things in common (i.e., 1 vis and 1 drawing technique or 2 vises). The other 2 should be unique from the other person's, although you're welcome to discuss your ideas to see which ones have merit.
         * Use ideas from your research (doesn't have to be *only* the 4 topics you found) to draw 3 different sketches of how we could visualize this data.
           * I'm looking for visualizations that have both nodes and edges, and also provide some way to connect the different phases ("connect" used loosely here).
     * **Submit your slides and sketches to this [Google Form](https://forms.gle/bT1UTtuJ7Ced3JJH8) by 11:59 PM on Monday, March 30.**

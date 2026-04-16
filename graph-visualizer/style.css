@@ -1,0 +1,52 @@
+
+.node:hover {
+    stroke: black;
+    stroke-width: 3px;
+}
+
+#tooltip {
+    position: absolute;
+    display: none;
+    background: #ffffff;
+    box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
+    border: 2px solid #000000;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 8px;
+    min-width: 160px;
+    color: #333;
+    z-index: 5 !important;
+}
+
+.phase_btn {
+    padding: 10px 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    border-radius: 75px;
+}
+
+.phase_btn:hover {
+    cursor: pointer;
+    background-color: #00b3b3;
+}
+
+.phase_btn.selected {
+    background-color: #00b3b3;
+    border: 2px solid #006666;
+    color: white;
+  }
+
+#mainFlexBox {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    max-height: 1000px;
+    width: 1400px;
+}
+
+#button-box {
+    position: relative;
+    transform:translate(0px, 40px)
+}
