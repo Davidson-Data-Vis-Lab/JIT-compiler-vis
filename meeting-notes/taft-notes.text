@@ -1,3 +1,20 @@
-This is a file for taking notes. TAFT HARRELL!
+4/8/2026 Partner Work:
 
-I love JIT compilers.
+We added initalEdges for each Node and trying to compare it to Dr. Lim's
+phase visualizations.
+
+In the GraphBuilderPhase visualization (phaseFnId = 93598), notice that node 8 points to
+node 7. However, if you look in the IR under node 8, there is an instruction under removed
+(instruction ID 12602879) that replaces 8's initialEdge of 7 to 13. This change is not reflected
+in Dr. Lim's GraphBuilderPhase visualization, but might explain why we don't see 7 as an active node
+under our visualization.
+
+Node 14 also presents the same problem. It has an intialEdge to 7 but it is replaced by a different node.
+This change is not reflected in Dr. Lim's visualization.
+
+The graph visualization with phaseID 130692, EffectControlLineraizationPhase, has a different phaseID for
+the IR file. In the IR file, it has a phase ID of 130937.
+
+Questions for Dr. Lim:
+1. What determines whether or not a node is dead or alive?
+2. Is there a situation where a node can die and then become alive again?
