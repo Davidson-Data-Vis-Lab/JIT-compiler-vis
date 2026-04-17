@@ -396,9 +396,30 @@ function organizeEdges() {
         //Start phaseNumber at 0 for indexing
         var phaseNumber = 0;
 
+        var phaseID = 0;
+
+        vis.phaseIDs
+
+
+
+        //Set all phases before first_instruction_phase
+        while (first_instruction_phase > Number(vis.phaseIDs[phaseID])) {
+
+                phaseDictionary.set(Number(vis.phaseIDs[phaseID]), []); 
+                phaseID += 1;
+
+        }
+
         edge_relevant_instructions.forEach(instructionID => {
 
             const instructionPhase = node_instructions[instructionID].phaseFnId;
+
+            while (Number(vis.phaseIDs[phaseID]) < instructionPhase) {
+
+                phaseID += 1;
+                phaseDictionary.set(Number(vis.phaseIDs[phaseID]), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseID - 1]).slice());
+
+            }
 
             if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
@@ -477,9 +498,27 @@ function organizeEdges() {
             })
 
         }
+
+        else {
+
+            for (let i = 0; i < vis.phaseIDs.length; i++) {
+
+                phaseKeys = Array.from(phaseDictionary.keys())
+
+                if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
+
+                    phaseDictionary.set(vis.phaseIDs[i], phaseDictionary.get(phaseKeys[i - 1]))
+
+                }
+
+            }
+
+        }
         
 
     })
+
+    console.log(nodeEdges);
 
     return nodeEdges;
 }
