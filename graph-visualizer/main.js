@@ -320,31 +320,31 @@ function renderVis() {
             }
         });
     
-        d3.select('#tooltip')
-            .style('display', 'block')
-            .style('left', (event.pageX + vis.tooltipPadding) + 'px')
-            .style('top', (event.pageY + vis.tooltipPadding) + 'px')
-            .html(`
-                <ul>
-                  <li><strong>Node ID:</strong> ${d.id}</li>
-                  <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
-                  <li><strong>Alive?:</strong> ${alive_status}</li>
-                  <li><strong>Size:</strong> ${d.size} bytes</li>
-                  <li><strong>Created in Phase:</strong> ${creationPhase}</li>
-                  <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
-                  <li><strong>Killed in Phase:</strong> ${killPhase}</li>
-                </ul>
-              `);
-    })
-    .on('mouseleave', () => {
-        vis.iterableEdges.forEach(edge => {
-            edge.setAttribute("stroke-width", 0.5);
-        });
+    //     d3.select('#tooltip')
+    //         .style('display', 'block')
+    //         .style('left', (event.pageX + vis.tooltipPadding) + 'px')
+    //         .style('top', (event.pageY + vis.tooltipPadding) + 'px')
+    //         .html(`
+    //             <ul>
+    //               <li><strong>Node ID:</strong> ${d.id}</li>
+    //               <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+    //               <li><strong>Alive?:</strong> ${alive_status}</li>
+    //               <li><strong>Size:</strong> ${d.size} bytes</li>
+    //               <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+    //               <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
+    //               <li><strong>Killed in Phase:</strong> ${killPhase}</li>
+    //             </ul>
+    //           `);
+    // })
+    // .on('mouseleave', () => {
+    //     vis.iterableEdges.forEach(edge => {
+    //         edge.setAttribute("stroke-width", 0.5);
+    //     });
 
-        d3.select('#tooltip').style('display', 'none');
-    });
-        
+    //     d3.select('#tooltip').style('display', 'none');
+    // });
 }
+    )}
 
 initVis();
 
@@ -383,11 +383,11 @@ function organizeEdges() {
         var edge_relevant_instructions = [];
 
         for (const instruction of node_removed) {
-            edge_relevant_instructions.push(instruction[0]);
+            edge_relevant_instructions.push(instruction);
         }
 
         for (const instruction of node_replaced) {
-            edge_relevant_instructions.push(instruction[0]);
+            edge_relevant_instructions.push(instruction);
         }
 
         //Sort instructions so that we can go through optimization temporally
@@ -398,11 +398,7 @@ function organizeEdges() {
 
         var phaseID = 0;
 
-        vis.phaseIDs
-
-
-
-        //Set all phases before first_instruction_phase
+        //Set all phases that are before the first_instruction_phase to an empty array (node has not been created yet)
         while (first_instruction_phase > Number(vis.phaseIDs[phaseID])) {
 
                 phaseDictionary.set(Number(vis.phaseIDs[phaseID]), []); 
@@ -410,7 +406,9 @@ function organizeEdges() {
 
         }
 
-        edge_relevant_instructions.forEach(instructionID => {
+        edge_relevant_instructions.forEach(instruction => {
+
+            const instructionID = instruction[0];
 
             const instructionPhase = node_instructions[instructionID].phaseFnId;
 
@@ -421,27 +419,9 @@ function organizeEdges() {
 
             }
 
-            if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
-
-                if (instructionPhase < first_instruction_phase) {
-
-                    //Node not created yet, so set edges to empty list
-                    phaseDictionary.set(instructionPhase, []); 
-
-                }
-
-                else {
-
-                    //Get edges from previous phase
-                    phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
-
-                }
-                
-                phaseNumber += 1;
-
-            }
-
             if (node_replaced.length != 0) {
+
+                if (node_replaced.includes(instruction)) {
 
                 //Check replaced for the instruction and replace edge
                 const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
@@ -453,18 +433,34 @@ function organizeEdges() {
                     edges[edgePosition] = newValue;
                     phaseDictionary.set(instructionPhase, edges);
                 }
+
+                }
                 
             }
 
-            else if (node_removed.length != 0) {
-                const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
-                if (removedEntry) {
-                    var instruction = removedEntry[1];
-                    var removedNode = instruction.nodeId;
-                    var edges = phaseDictionary.get(instructionPhase);
-                    edges.splice(edges.indexOf(removedNode), 1);
-                    phaseDictionary.set(instructionPhase, edges);
+            if (node_removed.length != 0) {
+
+                if (node_removed.includes(instruction)) {
+
+                     const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
+                    if (removedEntry) {
+                        var instruction = removedEntry[1];
+                        var removedNode = instruction.nodeId;
+                        var edges = phaseDictionary.get(instructionPhase);
+                        if (node.id == 8) {
+                            console.log("Edges before removal: " + edges);
+                        }
+                        edges.splice(edges.indexOf(removedNode), 1);
+                        if (node.id == 8) {
+                            console.log("Edges after removal: " + edges);
+                            console.log(instructionPhase);
+                        }
+
+                        phaseDictionary.set(instructionPhase, edges);
+                    }
+
                 }
+
             }
 
         })
@@ -487,7 +483,7 @@ function organizeEdges() {
 
                     else {
 
-                        phaseDictionary.set(phase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber - 1]));
+                        phaseDictionary.set(Number(phase), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber - 1]));
 
                     }
 
@@ -507,7 +503,7 @@ function organizeEdges() {
 
                 if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
 
-                    phaseDictionary.set(vis.phaseIDs[i], phaseDictionary.get(phaseKeys[i - 1]))
+                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]))
 
                 }
 
