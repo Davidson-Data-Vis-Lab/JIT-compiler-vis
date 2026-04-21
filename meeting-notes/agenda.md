@@ -13,6 +13,10 @@ Ellora and I talked about verifying the data. We want to make Python scripts tha
 * To fix the edges on the JS visualization (they currently disappear after a hover instead of returning to thin edges), check the enter-update-exit part of the code for your edges (might be near the "hover" keyword). Odds are, the opacity for the edges isn't being brought back to normal or the edges are being totally removed and aren't redrawn. Check the diff between the two commits -- see what lines are different in main.js.
 
 
+Taft and I checked Calendly. We reviewed the bugs Ellora pointed out in the JS visualization and fixed the number layout issue. We talked about writing Python scripts to check the JSON information and also looked at the data structures in main.js and how we could use them in the Sugiyama code. It seems simpler than I initially thought. 
+
+**Notes from Slack:**
+
 Last week, Ellora and I spoke about trying to use different graph drawing algorithms to change the layout of the graphs. One that I mentioned on Tuesday but then forgot today is the [force-directed layout](https://observablehq.com/@d3/force-directed-graph-component). This one might work best for a Sea of Nodes type IR, which (I think) is what we currently have
 
 The Sugiyama might work better for a control flow graph (CFG). But we won't know until we experiment. Try making simple versions of both --> getting 1 phase of our JSON data to be visualized. This might take a week or a little longer
