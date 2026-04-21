@@ -360,16 +360,16 @@ function organizeEdges() {
 
     //Map to be returned; store all edges for each phase of each node
     //Keys: Nodes, values: sub-dictionary with keys: phaseIDs and values: list of outgoing edges (nodeIDs)
-    nodeEdges = new Map();
+    const nodeEdges = new Map();
 
     vis.nodes.forEach(node => {
 
-        phaseDictionary = new Map();
+        const phaseDictionary = new Map();
         nodeEdges.set(node.id, phaseDictionary)
 
         //Get all removed, replaced, and instAccess instructions
-        node_removed = Array.from(Object.entries(node.removed));
-        node_replaced = Array.from(Object.entries(node.replaced));
+        const node_removed = Array.from(Object.entries(node.removed));
+        const node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
         //Get the very first instruction for each node and determine what phase it is part of
@@ -391,7 +391,8 @@ function organizeEdges() {
         }
 
         //Sort instructions so that we can go through optimization temporally
-        edge_relevant_instructions.sort((a, b) => a - b);
+        // Changed to be sorting numerically by instruction ID
+        edge_relevant_instructions.sort((a, b) => Number(a[0]) - Number(b[0]))
 
         //Start phaseNumber at 0 for indexing
         var phaseNumber = 0;
@@ -421,7 +422,7 @@ function organizeEdges() {
 
             if (node_replaced.length != 0) {
 
-                if (node_replaced.includes(instruction)) {
+                if (node_replaced.includes(instruction)) { // I think this will always return false, and we should just execute the .find blocks directly? 
 
                 //Check replaced for the instruction and replace edge
                 const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
@@ -429,8 +430,8 @@ function organizeEdges() {
                     var instruction = replacedEntry[1];
                     var edgePosition = instruction.position;
                     var newValue = instruction.to;
-                    var edges = phaseDictionary.get(instructionPhase);
-                    edges[edgePosition] = newValue;
+                    var edges = phaseDictionary.get(instructionPhase).slice();
+                    edges[edgePosition] = newValue;  
                     phaseDictionary.set(instructionPhase, edges);
                 }
 
@@ -503,7 +504,7 @@ function organizeEdges() {
 
                 if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
 
-                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]))
+                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]).splice()) // need to add .slice here? 
 
                 }
 
