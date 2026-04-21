@@ -1,5 +1,14 @@
 # Agenda
 
+## Tues, April 21 - Individual Meetings
+
+We reviewed the changes that Taft and Ellora made. I also discussed optimal scheduling times with T&E for the interviews. I sent emails to 2 participants today.
+
+Last week, Ellora and I spoke about trying to use different graph drawing algorithms to change the layout of the graphs. One that I mentioned on Tuesday but then forgot today is the [force-directed layout](https://observablehq.com/@d3/force-directed-graph-component). This one might work best for a Sea of Nodes type IR, which (I think) is what we currently have
+
+The Sugiyama might work better for a control flow graph (CFG). But we won't know until we experiment. Try making simple versions of both --> getting 1 phase of our JSON data to be visualized. This might take a week or a little longer
+* [Sugiyama examples](https://erikbrinkman.github.io/d3-dag/#examples)
+* [Sugiyama codepen](https://codepen.io/brinkbot/pen/oNQwNRv)
 
 ## Thurs, April 16 - Met with Ellora (Taft away)
 Checking alive/not. Type 3
