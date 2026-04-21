@@ -4,6 +4,15 @@
 
 We reviewed the changes that Taft and Ellora made. I also discussed optimal scheduling times with T&E for the interviews. I sent emails to 2 participants today.
 
+Ellora and I talked about verifying the data. We want to make Python scripts that produces:
+* A list of each node's edges for each phase
+  * Edges should be denoted by incoming or outgoing
+  * Review JITCIR readme page for the words "input nodes."
+* also alive status for each node in each phase
+
+* To fix the edges on the JS visualization (they currently disappear after a hover instead of returning to thin edges), check the enter-update-exit part of the code for your edges (might be near the "hover" keyword). Odds are, the opacity for the edges isn't being brought back to normal or the edges are being totally removed and aren't redrawn. Check the diff between the two commits -- see what lines are different in main.js.
+
+
 Last week, Ellora and I spoke about trying to use different graph drawing algorithms to change the layout of the graphs. One that I mentioned on Tuesday but then forgot today is the [force-directed layout](https://observablehq.com/@d3/force-directed-graph-component). This one might work best for a Sea of Nodes type IR, which (I think) is what we currently have
 
 The Sugiyama might work better for a control flow graph (CFG). But we won't know until we experiment. Try making simple versions of both --> getting 1 phase of our JSON data to be visualized. This might take a week or a little longer
