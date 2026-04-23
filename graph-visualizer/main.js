@@ -178,10 +178,11 @@ function updateVis() {
           if (targetNode !== -1) allEdges.push([node.id, targetNode]);
         });
       });
-  
+      
+      //Edges contain input nodes, so direction is targetnode points to sourcenode
       vis.links = allEdges.map(([s, t]) => ({
-        source: vis.circles[s],
-        target: vis.circles[t]
+        source: vis.circles[t],
+        target: vis.circles[s]
       }));
     }
   
@@ -259,8 +260,13 @@ function renderVis() {
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d, i) => vis.circles[i].x)
-        .attr("y", (d, i) => vis.circles[i].y)
+        .attr("x", (d, i) => {
+            if (d.id < 10) {
+                return vis.circles[i].x - 5;
+            }
+            return vis.circles[i].x - 7;
+        })
+        .attr("y", (d, i) => vis.circles[i].y - 10)
         .attr("fill", "black")
         .style("font-size", "20px")
         .text(d => d.id);
@@ -320,31 +326,30 @@ function renderVis() {
             }
         });
     
-    //     d3.select('#tooltip')
-    //         .style('display', 'block')
-    //         .style('left', (event.pageX + vis.tooltipPadding) + 'px')
-    //         .style('top', (event.pageY + vis.tooltipPadding) + 'px')
-    //         .html(`
-    //             <ul>
-    //               <li><strong>Node ID:</strong> ${d.id}</li>
-    //               <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
-    //               <li><strong>Alive?:</strong> ${alive_status}</li>
-    //               <li><strong>Size:</strong> ${d.size} bytes</li>
-    //               <li><strong>Created in Phase:</strong> ${creationPhase}</li>
-    //               <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
-    //               <li><strong>Killed in Phase:</strong> ${killPhase}</li>
-    //             </ul>
-    //           `);
-    // })
-    // .on('mouseleave', () => {
-    //     vis.iterableEdges.forEach(edge => {
-    //         edge.setAttribute("stroke-width", 0.5);
-    //     });
+        d3.select('#tooltip')
+            .style('display', 'block')
+            .style('left', (event.pageX + vis.tooltipPadding) + 'px')
+            .style('top', (event.pageY + vis.tooltipPadding) + 'px')
+            .html(`
+                <ul>
+                  <li><strong>Node ID:</strong> ${d.id}</li>
+                  <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+                  <li><strong>Alive?:</strong> ${alive_status}</li>
+                  <li><strong>Size:</strong> ${d.size} bytes</li>
+                  <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+                  <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
+                  <li><strong>Killed in Phase:</strong> ${killPhase}</li>
+                </ul>
+              `);
+    })
+    .on('mouseleave', () => {
+        vis.iterableEdges.forEach(edge => {
+            edge.setAttribute("stroke-width", 0.5);
+        });
 
-    //     d3.select('#tooltip').style('display', 'none');
-    // });
+        d3.select('#tooltip').style('display', 'none');
+    });
 }
-    )}
 
 initVis();
 
@@ -504,7 +509,7 @@ function organizeEdges() {
 
                 if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
 
-                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]).splice()) // need to add .slice here? 
+                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]))
 
                 }
 
