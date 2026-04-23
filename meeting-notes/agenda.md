@@ -1,5 +1,24 @@
 # Agenda
 
+## Thurs, April 23 - Group Meeting
+
+I'll release the poster and summary information next week (April 30). 
+
+**TODO:**
+* Clean up GitHub branches: let's keep `main` (which is always a stable, working version) and have at most 2 other branches with works in progress.
+  * Can be 1 branch is Taft's and other is Ellora's
+  * Or have 1 branch as "grid version" of our tree and other branch as "tree-layout" versions of trees (where we're experimenting with different layouts)
+
+* Make a new folder with the Python scripts called `data-processing`. Make sure those files are well-commented.
+  * Add a README.md file to the Python script folder that describes what each file does and gives enough information that a new person could understand what you're trying to get from the JSON. 
+
+### Timeline for rest of semester
+1. April 28
+2. April 30
+3. May 5 - last meeting
+4. May 7 - VMC, no meeting 
+5. Poster and 2-page summary due by 11:59 PM on May 11
+
 ## Tues, April 21 - Individual Meetings
 
 We reviewed the changes that Taft and Ellora made. I also discussed optimal scheduling times with T&E for the interviews. I sent emails to 2 participants today.
@@ -12,6 +31,10 @@ Ellora and I talked about verifying the data. We want to make Python scripts tha
 
 * To fix the edges on the JS visualization (they currently disappear after a hover instead of returning to thin edges), check the enter-update-exit part of the code for your edges (might be near the "hover" keyword). Odds are, the opacity for the edges isn't being brought back to normal or the edges are being totally removed and aren't redrawn. Check the diff between the two commits -- see what lines are different in main.js.
 
+
+Taft and I checked Calendly. We reviewed the bugs Ellora pointed out in the JS visualization and fixed the number layout issue. We talked about writing Python scripts to check the JSON information and also looked at the data structures in main.js and how we could use them in the Sugiyama code. It seems simpler than I initially thought. 
+
+**Notes from Slack:**
 
 Last week, Ellora and I spoke about trying to use different graph drawing algorithms to change the layout of the graphs. One that I mentioned on Tuesday but then forgot today is the [force-directed layout](https://observablehq.com/@d3/force-directed-graph-component). This one might work best for a Sea of Nodes type IR, which (I think) is what we currently have
 
