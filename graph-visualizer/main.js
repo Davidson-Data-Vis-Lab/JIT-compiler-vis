@@ -239,7 +239,7 @@ function renderVis() {
         .attr("cx", (d, i) => vis.circles[i].x)
         .attr("cy", (d, i) => vis.circles[i].y)
         .attr("r", radius) 
-        .attr("fill", "steelblue")
+        .attr("fill", "#ADD8E6")
         .attr("opacity", (d) => {
             if (vis.filter == "none") {
                 return 1;
@@ -320,7 +320,7 @@ function renderVis() {
             }
         });
     
-        d3.select('#tooltip')
+        d3.select('#sidebar')
             .style('display', 'block')
             .style('left', (event.pageX + vis.tooltipPadding) + 'px')
             .style('top', (event.pageY + vis.tooltipPadding) + 'px')
@@ -341,7 +341,7 @@ function renderVis() {
             edge.setAttribute("stroke-width", 0.5);
         });
 
-        d3.select('#tooltip').style('display', 'none');
+        d3.select('#sidebar').style('display', 'none');
     });
         
 }
