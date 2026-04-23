@@ -180,8 +180,8 @@ function updateVis() {
       });
   
       vis.links = allEdges.map(([s, t]) => ({
-        source: vis.circles[s],
-        target: vis.circles[t]
+        source: vis.circles[t],
+        target: vis.circles[s]
       }));
     }
   
@@ -480,6 +480,7 @@ function organizeEdges() {
         
 
     })
+    console.log(nodeEdges);
 
     return nodeEdges;
 }
