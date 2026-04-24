@@ -75,13 +75,16 @@ def build_final_edges(nodes):
         for y in node.get("edges", []):
             final_edges.append([node_id, y])
     return final_edges
+    
 
 def build_phase_dict(instr_to_phase, initial_edges, final_edges):
     phase_edges = []
     for i in range(len(PHASES)):
         phase_edges.append(list(initial_edges))
 
-    for (node_id, instr_id), info in instr_to_phase.items():
+    
+
+    for (node_id, instr_id), info in sorted(instr_to_phase.items()):
         phase_fn_id = info.get("phaseFnId")
         phase_idx   = PHASE_INDEX_LOOKUP.get(phase_fn_id, -1)
         if phase_idx == -1:
