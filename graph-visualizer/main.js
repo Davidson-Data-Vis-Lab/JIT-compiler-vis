@@ -34,7 +34,6 @@ async function initVis() {
         .append("svg")
         .attr("width", width)
         .attr("height", boxHeight);
-        //.attr('viewBox', [0, 0, width, boxHeight]);
 
     // Define the arrowhead marker variables
     const markerBoxWidth = 20;
@@ -46,6 +45,7 @@ async function initVis() {
     const arrowPoints = [[0, 0], [0, 20], [20, 10]];
     vis.tooltipPadding = 15;
 
+    //Initialize lists that will contain phase function names and IDs; getPhases() will fill these objects
     vis.phases = [];
     vis.phaseIDs = [];
     getPhases();
@@ -72,7 +72,6 @@ async function initVis() {
     // Creating a map with nodes to respective edges array 
     vis.nodes.forEach(node => {
         nodeToEdges.set(node.id, node.edges)
-        //console.log(nodeToEdges.get(node.id));
     });
 
     const edges = [];
@@ -107,12 +106,6 @@ async function initVis() {
     vis.linkPath = d3.linkHorizontal()
         .x(d => d.x)
         .y(d => d.y);
-    
-
-    // Gives d3 a mapping of how to extract data and create paths
-    // vis.linkPath = d3.linkHorizontal()
-    //     .x(d => d.get("x"))
-    //     .y(d => d.get("y"));
 
     vis.nodeEdges = organizeEdges();
     vis.activeNodesByPhase = determineNodeActiveStatus(vis.nodeEdges);
@@ -124,25 +117,18 @@ async function initVis() {
 /**
  * Updates the visualization based on the optimziation phase selected by the user.
  */
-// function updateVis() {
-//     let vis = this;
-
-//     if (vis.filter != "none") {
-//         vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
-//     }
-
-//     renderVis();
-// }
 function updateVis() {
     let vis = this;
-  
+    
+    //Button has been clicked and no longer in default view
     if (vis.filter != "none") {
       vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
   
       const phaseEdges = [];
       vis.nodes.forEach(node => {
         if (!vis.phaseNodes.has(node.id)) return; // source must be alive
-  
+        
+        //Get the edges of each node for the specific chosen phase
         const phaseDictionary = vis.nodeEdges.get(node.id);
         let activeEdges = null;
   
@@ -165,7 +151,8 @@ function updateVis() {
           phaseEdges.push([node.id, targetNode]);
         });
       });
-  
+
+      //Create links that will be helpful towards visualizing edges later
       vis.links = phaseEdges.map(([sourcenode, targetnode]) => ({
         source: vis.circles[sourcenode],
         target: vis.circles[targetnode]
@@ -255,6 +242,7 @@ function renderVis() {
             }
         });
 
+    //Add node IDs to visualized nodes
     vis.svg.selectAll("text")
         .data(vis.nodes)
         .enter()
@@ -298,7 +286,7 @@ function renderVis() {
         const KILL   = 3;
 
         const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
-        const killPhase     = getFirstPhaseForInstType(d, KILL) ?? "N/A";
+        const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
 
         const OPT_TYPES = new Set([0, 1, 2, 4, 6]); 
 
@@ -325,7 +313,8 @@ function renderVis() {
                 edge.setAttribute("stroke-width", 2.5);
             }
         });
-    
+        
+        //Tooltip selection
         d3.select('#tooltip')
             .style('display', 'block')
             .style('left', (event.pageX + vis.tooltipPadding) + 'px')
@@ -381,9 +370,6 @@ function organizeEdges() {
         const first_instruction = Object.entries(node_instructions)[0][0];
         const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
 
-        //Set the intial edges for the first phase that the node is created in
-        phaseDictionary.set(first_instruction_phase, node.initialEdges.slice()); 
-
         //Store all removed and replaced instructionIDs within this list
         var edge_relevant_instructions = [];
 
@@ -399,9 +385,8 @@ function organizeEdges() {
         // Changed to be sorting numerically by instruction ID
         edge_relevant_instructions.sort((a, b) => Number(a[0]) - Number(b[0]))
 
-        //Start phaseNumber at 0 for indexing
+        //Start phaseNumber at 0 for indexing -- update this
         var phaseNumber = 0;
-
         var phaseID = 0;
 
         //Set all phases that are before the first_instruction_phase to an empty array (node has not been created yet)
@@ -418,50 +403,59 @@ function organizeEdges() {
 
             const instructionPhase = node_instructions[instructionID].phaseFnId;
 
-            while (Number(vis.phaseIDs[phaseID]) < instructionPhase) {
+            if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
-                phaseID += 1;
-                phaseDictionary.set(Number(vis.phaseIDs[phaseID]), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseID - 1]).slice());
+                //If we are at the phase that the node was created in, set its edges to inital edges of the node (only once)
+                if (Number(vis.phaseIDs[phaseID]) == first_instruction_phase && 
+                    !(Array.from(phaseDictionary.keys()).includes(first_instruction_phase))) {
+
+                    phaseDictionary.set(Number(vis.phaseIDs[phaseID]), node.initialEdges);
+
+                }
+
+                //In case we have moved on to a different optimization phase, retrieve edges from previous phase
+                //Accounts for if a node doesn't go through a particular optimization phase and still retrieves edges
+                while (Number(vis.phaseIDs[phaseID]) < instructionPhase) {
+
+                    phaseID += 1;
+                    phaseDictionary.set(Number(vis.phaseIDs[phaseID]), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseID - 1]).slice());
+
+                }
 
             }
 
+            //Check replaced for the instruction and replace edge
             if (node_replaced.length != 0) {
 
-                if (node_replaced.includes(instruction)) { // I think this will always return false, and we should just execute the .find blocks directly? 
+                if (node_replaced.includes(instruction)) { 
 
-                //Check replaced for the instruction and replace edge
-                const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
-                if (replacedEntry) {
-                    var instruction = replacedEntry[1];
-                    var edgePosition = instruction.position;
-                    var newValue = instruction.to;
-                    var edges = phaseDictionary.get(instructionPhase).slice();
-                    edges[edgePosition] = newValue;  
-                    phaseDictionary.set(instructionPhase, edges);
-                }
+                    const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
+                    if (replacedEntry) {
+
+                        var instruction = replacedEntry[1];
+                        var edgePosition = instruction.position;
+                        var newValue = instruction.to;
+                        var edges = phaseDictionary.get(instructionPhase).slice();
+                        edges[edgePosition] = newValue;  
+                        phaseDictionary.set(instructionPhase, edges);
+
+                    }
 
                 }
                 
             }
 
+            //Similarly, check removed for the instruction and remove the node
             if (node_removed.length != 0) {
 
                 if (node_removed.includes(instruction)) {
 
-                     const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
+                    const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
                     if (removedEntry) {
                         var instruction = removedEntry[1];
                         var removedNode = instruction.nodeId;
                         var edges = phaseDictionary.get(instructionPhase);
-                        if (node.id == 8) {
-                            console.log("Edges before removal: " + edges);
-                        }
                         edges.splice(edges.indexOf(removedNode), 1);
-                        if (node.id == 8) {
-                            console.log("Edges after removal: " + edges);
-                            console.log(instructionPhase);
-                        }
-
                         phaseDictionary.set(instructionPhase, edges);
                     }
 
@@ -471,9 +465,13 @@ function organizeEdges() {
 
         })
 
+        //In the case that a node does not go through optimization, set all phases to either empty (if before creation) or
+        // to inital edges (after creation)
         if (edge_relevant_instructions.length == 0) {
 
             phaseNumber = 0;
+
+            phaseDictionary.set(first_instruction_phase, node.initialEdges);
             
             vis.phaseIDs.forEach(phase => {
 
@@ -501,6 +499,8 @@ function organizeEdges() {
 
         }
 
+        //If node goes through optimization, make sure that phases after last optimization phase that node goes through
+        // are carried over to remaining phases
         else {
 
             for (let i = 0; i < vis.phaseIDs.length; i++) {
@@ -519,8 +519,6 @@ function organizeEdges() {
         
 
     })
-
-    console.log(nodeEdges);
 
     return nodeEdges;
 }
@@ -591,23 +589,26 @@ function determineNodeActiveStatus() {
 function createButtons() {
     let vis = this;
 
+    //HTML element buttons will be stored in
     const buttonBox = document.getElementById("button-box");
 
+    //Make button for every single phase
     for (let i = 0; i < vis.phases.length; i++) {
 
+        //Get phase name and phaseFnId
         split_phase = vis.phases[i].split("::");
-
         const phaseName = (split_phase[3]);
-
         const phaseId = vis.phaseIDs[i];
 
+        //Create the button and append it to HTML element
         const btn = document.createElement("button");
         btn.textContent = "Phase " + phaseId + ": " + phaseName;
         btn.className = "phase_btn";
         buttonBox.appendChild(btn);
 
+        //Add event listener that will update visualization for that phase when button is clicked
         btn.addEventListener("click", () => {
-            //vis.filter = Number(btn.textContent.split(" ")[1]);
+
             document.querySelectorAll(".phase_btn").forEach(b => b.classList.remove("selected"));
             btn.classList.add("selected");
 
