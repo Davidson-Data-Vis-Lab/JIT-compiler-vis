@@ -1,5 +1,114 @@
 # Agenda
 
+## Thurs, April 23 - Group Meeting
+
+I'll release the poster and summary information next week (April 30). 
+
+**TODO:**
+* Clean up GitHub branches: let's keep `main` (which is always a stable, working version) and have at most 2 other branches with works in progress.
+  * Can be 1 branch is Taft's and other is Ellora's
+  * Or have 1 branch as "grid version" of our tree and other branch as "tree-layout" versions of trees (where we're experimenting with different layouts)
+
+* Make a new folder with the Python scripts called `data-processing`. Make sure those files are well-commented.
+  * Add a README.md file to the Python script folder that describes what each file does and gives enough information that a new person could understand what you're trying to get from the JSON. 
+
+### Timeline for rest of semester
+1. April 28
+2. April 30
+3. May 5 - last meeting
+4. May 7 - VMC, no meeting 
+5. Poster and 2-page summary due by 11:59 PM on May 11
+
+## Tues, April 21 - Individual Meetings
+
+We reviewed the changes that Taft and Ellora made. I also discussed optimal scheduling times with T&E for the interviews. I sent emails to 2 participants today.
+
+Ellora and I talked about verifying the data. We want to make Python scripts that produces:
+* A list of each node's edges for each phase
+  * Edges should be denoted by incoming or outgoing
+  * Review JITCIR readme page for the words "input nodes."
+* also alive status for each node in each phase
+
+* To fix the edges on the JS visualization (they currently disappear after a hover instead of returning to thin edges), check the enter-update-exit part of the code for your edges (might be near the "hover" keyword). Odds are, the opacity for the edges isn't being brought back to normal or the edges are being totally removed and aren't redrawn. Check the diff between the two commits -- see what lines are different in main.js.
+
+
+Taft and I checked Calendly. We reviewed the bugs Ellora pointed out in the JS visualization and fixed the number layout issue. We talked about writing Python scripts to check the JSON information and also looked at the data structures in main.js and how we could use them in the Sugiyama code. It seems simpler than I initially thought. 
+
+**Notes from Slack:**
+
+Last week, Ellora and I spoke about trying to use different graph drawing algorithms to change the layout of the graphs. One that I mentioned on Tuesday but then forgot today is the [force-directed layout](https://observablehq.com/@d3/force-directed-graph-component). This one might work best for a Sea of Nodes type IR, which (I think) is what we currently have
+
+The Sugiyama might work better for a control flow graph (CFG). But we won't know until we experiment. Try making simple versions of both --> getting 1 phase of our JSON data to be visualized. This might take a week or a little longer
+* [Sugiyama examples](https://erikbrinkman.github.io/d3-dag/#examples)
+* [Sugiyama codepen](https://codepen.io/brinkbot/pen/oNQwNRv)
+
+## Thurs, April 16 - Met with Ellora (Taft away)
+Checking alive/not. Type 3
+
+TODO:
+* Add code to determine which phase the node was created and which phase the node was killed (by looking at instruction type:7 (created) and type:3 (killed) and checking the phaseFnId)
+* Verify our visualization against IR file.
+* Nitpicky changes to make
+  * Change blue background to light blue
+  * Change location of node ID text to up a little bit and left a little bit
+  * Like that the arrows are red (easy to see) but they need to be bigger
+  * Move tooltip to side bar (make sure that it's obvious what node I'm looking at) -- I would make the outline slightly heavier (by 3 px) and I would add color to the node (so everything is light blue if alive, but if I'm looking at the node, then it's medium blue)
+  * MEREGE THAT BRANCH WITH MAIN
+
+* Next phase: explore graph drawing algorithms. Sugiyama, others that y'all presented. 
+  * Example: Sugiyama style d3 code: https://erikbrinkman.github.io/d3-dag/#examples
+  * Another example: https://codepen.io/brinkbot/pen/oNQwNRv
+* Review the questions doc for people in interviews: https://docs.google.com/document/d/12oJefpEDQESdi6lroOaqXBC7Zy78PaEEyOAMFsbw__Y/edit?usp=drive_link
+
+## Tues, April 14 - Met with Dr. Lim
+
+We validated the GraphBuilderPhase in the IR file, but not against his image (haven't validated the others). Our blue nodes are alive during the phase and the grey means not alive. 
+
+
+Discussion reveals that our definition of "alive" (which we considered "connected by edges") was wrong and "alive" is defined by type. Our other information seems correct (op code, node, size, created). **At the end of compilation, we know nodes with ids 0-35 should be alive (more or less) and 36+ should not be alive.**
+
+
+TL says that "dead" means the node was removed from the IR. If a node is alive at the end, that means it was converted into machine instructions. Throughout the process, nodes have opcodes and when they are alive, that means we are using the node and thus, using the opcode. 
+
+Somewhere in the node's instructions, they will have the instruction "DEAD," which means the memory is wiped and replaced with 0s. 
+  * Example: Node 92 is actually dead, dead in phase 142962 so the InstructionSelectionPhase.
+  * Every instruction has a type. Everything with type 3 "KILL" means the node is dead
+  * Theoretically, every 1st instAccess for a node should be type 7 "CREATE"
+  * Here's the [**Table of Access Types**](https://github.com/hlim1/JITCIRModeler/blob/code_fix/README.md#access-types)
+
+TL reiterates: "We're interested in what phase did what activity on the node. This can help id which phase caused the killing (possibly incorrectly)."
+
+After the type:3 instruction, there could be other  instructions used for memory overwriting and cleaning. *Can see 4's (value change), 1's (removal), or 5's (read) after 3's.*
+  * Problematic of we see 0s or 7s after a 3 --> could mean that the compiler is reusing the memory location and not recognizing that it's a new node that's reusing the location.
+
+TL: "Optimizer traverses the graph many times until it realizes there are no more optimizations to do."
+  * The edges have several meanings: could mean control flow or could mean data flow. Depends on Sea of Nodes or SAA (which is CFG).
+  * BUT THE EDGE DIRECTION IS STILL USEFUL! Shows what the node value is returning do, shows how data is flowing. Likes both outgoing and incoming edges.
+
+**For graph layout:** would be nice if we could support laying out the Sea of Nodes or SSA (CFG) or data flow. Might have different layout algorithms.
+
+**Unknown**: node 48 has 2 type:3 instructions. It was somehow wiped, and now we're trying to wipe again. *Not sure why.* Between the 3's there are 2x1's, 3x4's, and 2x5's types. 
+
+TODO:
+* Make the phase fill (for the selected button) persistent so I know what phase I'm looking at once I move my mouse away
+* Fix the killed field based on type: 3
+
+## Thurs, April 9 - Group meeting
+We reviewed T&E's current visualization. I gave feedback on things to fix before we meet with Dr. Lim next week.
+
+TODO:
+* Rename existing "tooltip" in code to "edge-view" (or similar)
+* Make [tooltip](https://docs.google.com/document/d/1Bg9b-rQukDJE4lqDtjT938lENsxKvFe475PhgsCuaBE/edit?tab=t.0#heading=h.h4o0crisufls) (i.e., a hover box) that shows data from the IR
+  * We're using this for debugging/confirming accuracy so whatever fields you think are most useful
+  * We thought likely mnemonic/op code, initial edges, removed edges, replaced edges
+* Add directionality to edges (and ask about what the directions mean)
+* Add to the [Questions Page](https://docs.google.com/document/d/13lQUKRDBjBLTygpteZJSBBbJ7kQ6HGnPasy88-a9B0w/edit?tab=t.0)
+* Dr. Williams will get the code up on GitHub.io
+
+
+## Tues, April 7 - No meeting
+Tuesday followed Monday schedule, so no meeting.
+
 ## Thurs, April 2 - Group Meeting
 T&E are updating KPW about the programming they have done for the visualization. 
 
@@ -15,6 +124,7 @@ Updates:
 Taft and Ellora presented the different graph layout styles and techniques that they researched (my [notes](https://docs.google.com/document/d/1NkDcMBiCtUrvxlRtBJj7Umh8a8dw95E7nx9EhvBm8CI/edit?usp=sharing)). We discussed potentially using Sugiyama layout or a 3-D layout, several others. Ellora had the foresight to consider how we could compare different phases so she proposed radar charts. Taft brought up circle packing and 3-D layouts, which could work but have constraints (circe packing needs to be a hierarchy, 3-D is tricky in 2-D). However, the 3-D idea is probably most intuitive if we can do it well. Another alternative was the idea to lay out the phases sequentially. 
 
 ## Tues, March 24 - Group meeting (NO SINGLE MEETINGS THIS WEEK)
+
 
 Agenda:
 * Updates since last time
