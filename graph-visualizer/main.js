@@ -315,10 +315,10 @@ function renderVis() {
         });
         
         //Tooltip selection
-        d3.select('#tooltip')
+        d3.select('#sidebar')
             .style('display', 'block')
-            .style('left', (event.pageX + vis.tooltipPadding) + 'px')
-            .style('top', (event.pageY + vis.tooltipPadding) + 'px')
+            .style('left', (event.pageX) + 'px')
+            .style('top', (event.pageY) + 'px')
             .html(`
                 <ul>
                   <li><strong>Node ID:</strong> ${d.id}</li>
