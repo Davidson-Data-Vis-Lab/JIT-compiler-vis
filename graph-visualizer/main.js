@@ -34,7 +34,6 @@ async function initVis() {
         .append("svg")
         .attr("width", width)
         .attr("height", boxHeight);
-        //.attr('viewBox', [0, 0, width, boxHeight]);
 
     // Define the arrowhead marker variables
     const markerBoxWidth = 20;
@@ -46,6 +45,7 @@ async function initVis() {
     const arrowPoints = [[0, 0], [0, 20], [20, 10]];
     vis.tooltipPadding = 15;
 
+    //Initialize lists that will contain phase function names and IDs; getPhases() will fill these objects
     vis.phases = [];
     vis.phaseIDs = [];
     getPhases();
@@ -72,7 +72,6 @@ async function initVis() {
     // Creating a map with nodes to respective edges array 
     vis.nodes.forEach(node => {
         nodeToEdges.set(node.id, node.edges)
-        //console.log(nodeToEdges.get(node.id));
     });
 
     const edges = [];
@@ -107,12 +106,6 @@ async function initVis() {
     vis.linkPath = d3.linkHorizontal()
         .x(d => d.x)
         .y(d => d.y);
-    
-
-    // Gives d3 a mapping of how to extract data and create paths
-    // vis.linkPath = d3.linkHorizontal()
-    //     .x(d => d.get("x"))
-    //     .y(d => d.get("y"));
 
     vis.nodeEdges = organizeEdges();
     vis.activeNodesByPhase = determineNodeActiveStatus(vis.nodeEdges);
@@ -124,25 +117,18 @@ async function initVis() {
 /**
  * Updates the visualization based on the optimziation phase selected by the user.
  */
-// function updateVis() {
-//     let vis = this;
-
-//     if (vis.filter != "none") {
-//         vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
-//     }
-
-//     renderVis();
-// }
 function updateVis() {
     let vis = this;
-  
+    
+    //Button has been clicked and no longer in default view
     if (vis.filter != "none") {
       vis.phaseNodes = vis.activeNodesByPhase.get(vis.filter);
   
       const phaseEdges = [];
       vis.nodes.forEach(node => {
         if (!vis.phaseNodes.has(node.id)) return; // source must be alive
-  
+        
+        //Get the edges of each node for the specific chosen phase
         const phaseDictionary = vis.nodeEdges.get(node.id);
         let activeEdges = null;
   
@@ -165,7 +151,8 @@ function updateVis() {
           phaseEdges.push([node.id, targetNode]);
         });
       });
-  
+
+      //Create links that will be helpful towards visualizing edges later
       vis.links = phaseEdges.map(([sourcenode, targetnode]) => ({
         source: vis.circles[sourcenode],
         target: vis.circles[targetnode]
@@ -178,7 +165,8 @@ function updateVis() {
           if (targetNode !== -1) allEdges.push([node.id, targetNode]);
         });
       });
-  
+      
+      //Edges contain input nodes, so direction is targetnode points to sourcenode
       vis.links = allEdges.map(([s, t]) => ({
         source: vis.circles[t],
         target: vis.circles[s]
@@ -254,13 +242,19 @@ function renderVis() {
             }
         });
 
+    //Add node IDs to visualized nodes
     vis.svg.selectAll("text")
         .data(vis.nodes)
         .enter()
         .append("text")
         .attr("class", "label")
-        .attr("x", (d, i) => vis.circles[i].x)
-        .attr("y", (d, i) => vis.circles[i].y)
+        .attr("x", (d, i) => {
+            if (d.id < 10) {
+                return vis.circles[i].x - 5;
+            }
+            return vis.circles[i].x - 7;
+        })
+        .attr("y", (d, i) => vis.circles[i].y - 10)
         .attr("fill", "black")
         .style("font-size", "20px")
         .text(d => d.id);
@@ -292,7 +286,7 @@ function renderVis() {
         const KILL   = 3;
 
         const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
-        const killPhase     = getFirstPhaseForInstType(d, KILL) ?? "N/A";
+        const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
 
         const OPT_TYPES = new Set([0, 1, 2, 4, 6]); 
 
@@ -319,8 +313,9 @@ function renderVis() {
                 edge.setAttribute("stroke-width", 2.5);
             }
         });
-    
-        d3.select('#sidebar')
+        
+        //Tooltip selection
+        d3.select('#tooltip')
             .style('display', 'block')
             .style('left', (event.pageX + vis.tooltipPadding) + 'px')
             .style('top', (event.pageY + vis.tooltipPadding) + 'px')
@@ -343,7 +338,6 @@ function renderVis() {
 
         d3.select('#sidebar').style('display', 'none');
     });
-        
 }
 
 initVis();
@@ -360,97 +354,124 @@ function organizeEdges() {
 
     //Map to be returned; store all edges for each phase of each node
     //Keys: Nodes, values: sub-dictionary with keys: phaseIDs and values: list of outgoing edges (nodeIDs)
-    nodeEdges = new Map();
+    const nodeEdges = new Map();
 
     vis.nodes.forEach(node => {
 
-        phaseDictionary = new Map();
+        const phaseDictionary = new Map();
         nodeEdges.set(node.id, phaseDictionary)
 
         //Get all removed, replaced, and instAccess instructions
-        node_removed = Array.from(Object.entries(node.removed));
-        node_replaced = Array.from(Object.entries(node.replaced));
+        const node_removed = Array.from(Object.entries(node.removed));
+        const node_replaced = Array.from(Object.entries(node.replaced));
         node_instructions = node.instAccess;
 
         //Get the very first instruction for each node and determine what phase it is part of
         const first_instruction = Object.entries(node_instructions)[0][0];
         const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
 
-        //Set the intial edges for the first phase that the node is created in
-        phaseDictionary.set(first_instruction_phase, node.initialEdges.slice()); 
-
         //Store all removed and replaced instructionIDs within this list
         var edge_relevant_instructions = [];
 
         for (const instruction of node_removed) {
-            edge_relevant_instructions.push(instruction[0]);
+            edge_relevant_instructions.push(instruction);
         }
 
         for (const instruction of node_replaced) {
-            edge_relevant_instructions.push(instruction[0]);
+            edge_relevant_instructions.push(instruction);
         }
 
         //Sort instructions so that we can go through optimization temporally
-        edge_relevant_instructions.sort((a, b) => a - b);
+        // Changed to be sorting numerically by instruction ID
+        edge_relevant_instructions.sort((a, b) => Number(a[0]) - Number(b[0]))
 
-        //Start phaseNumber at 0 for indexing
+        //Start phaseNumber at 0 for indexing -- update this
         var phaseNumber = 0;
+        var phaseID = 0;
 
-        edge_relevant_instructions.forEach(instructionID => {
+        //Set all phases that are before the first_instruction_phase to an empty array (node has not been created yet)
+        while (first_instruction_phase > Number(vis.phaseIDs[phaseID])) {
+
+                phaseDictionary.set(Number(vis.phaseIDs[phaseID]), []); 
+                phaseID += 1;
+
+        }
+
+        edge_relevant_instructions.forEach(instruction => {
+
+            const instructionID = instruction[0];
 
             const instructionPhase = node_instructions[instructionID].phaseFnId;
 
             if (!(Array.from(phaseDictionary.keys()).includes(instructionPhase))) {
 
-                if (instructionPhase < first_instruction_phase) {
+                //If we are at the phase that the node was created in, set its edges to inital edges of the node (only once)
+                if (Number(vis.phaseIDs[phaseID]) == first_instruction_phase && 
+                    !(Array.from(phaseDictionary.keys()).includes(first_instruction_phase))) {
 
-                    //Node not created yet, so set edges to empty list
-                    phaseDictionary.set(instructionPhase, []); 
-
-                }
-
-                else {
-
-                    //Get edges from previous phase
-                    phaseDictionary.set(instructionPhase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber]).slice());
+                    phaseDictionary.set(Number(vis.phaseIDs[phaseID]), node.initialEdges);
 
                 }
-                
-                phaseNumber += 1;
+
+                //In case we have moved on to a different optimization phase, retrieve edges from previous phase
+                //Accounts for if a node doesn't go through a particular optimization phase and still retrieves edges
+                while (Number(vis.phaseIDs[phaseID]) < instructionPhase) {
+
+                    phaseID += 1;
+                    phaseDictionary.set(Number(vis.phaseIDs[phaseID]), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseID - 1]).slice());
+
+                }
 
             }
 
+            //Check replaced for the instruction and replace edge
             if (node_replaced.length != 0) {
 
-                //Check replaced for the instruction and replace edge
-                const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
-                if (replacedEntry) {
-                    var instruction = replacedEntry[1];
-                    var edgePosition = instruction.position;
-                    var newValue = instruction.to;
-                    var edges = phaseDictionary.get(instructionPhase);
-                    edges[edgePosition] = newValue;
-                    phaseDictionary.set(instructionPhase, edges);
+                if (node_replaced.includes(instruction)) { 
+
+                    const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
+                    if (replacedEntry) {
+
+                        var instruction = replacedEntry[1];
+                        var edgePosition = instruction.position;
+                        var newValue = instruction.to;
+                        var edges = phaseDictionary.get(instructionPhase).slice();
+                        edges[edgePosition] = newValue;  
+                        phaseDictionary.set(instructionPhase, edges);
+
+                    }
+
                 }
                 
             }
 
-            else if (node_removed.length != 0) {
-                const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
-                if (removedEntry) {
-                    var instruction = removedEntry[1];
-                    var removedNode = instruction.nodeId;
-                    var edges = phaseDictionary.get(instructionPhase);
-                    edges.splice(edges.indexOf(removedNode), 1);
-                    phaseDictionary.set(instructionPhase, edges);
+            //Similarly, check removed for the instruction and remove the node
+            if (node_removed.length != 0) {
+
+                if (node_removed.includes(instruction)) {
+
+                    const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
+                    if (removedEntry) {
+                        var instruction = removedEntry[1];
+                        var removedNode = instruction.nodeId;
+                        var edges = phaseDictionary.get(instructionPhase);
+                        edges.splice(edges.indexOf(removedNode), 1);
+                        phaseDictionary.set(instructionPhase, edges);
+                    }
+
                 }
+
             }
 
         })
 
+        //In the case that a node does not go through optimization, set all phases to either empty (if before creation) or
+        // to inital edges (after creation)
         if (edge_relevant_instructions.length == 0) {
 
             phaseNumber = 0;
+
+            phaseDictionary.set(first_instruction_phase, node.initialEdges);
             
             vis.phaseIDs.forEach(phase => {
 
@@ -466,7 +487,7 @@ function organizeEdges() {
 
                     else {
 
-                        phaseDictionary.set(phase, phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber - 1]));
+                        phaseDictionary.set(Number(phase), phaseDictionary.get(Array.from(phaseDictionary.keys())[phaseNumber - 1]));
 
                     }
 
@@ -475,6 +496,24 @@ function organizeEdges() {
                 phaseNumber += 1;
 
             })
+
+        }
+
+        //If node goes through optimization, make sure that phases after last optimization phase that node goes through
+        // are carried over to remaining phases
+        else {
+
+            for (let i = 0; i < vis.phaseIDs.length; i++) {
+
+                phaseKeys = Array.from(phaseDictionary.keys())
+
+                if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
+
+                    phaseDictionary.set(Number(vis.phaseIDs[i]), phaseDictionary.get(phaseKeys[i - 1]))
+
+                }
+
+            }
 
         }
         
@@ -551,23 +590,26 @@ function determineNodeActiveStatus() {
 function createButtons() {
     let vis = this;
 
+    //HTML element buttons will be stored in
     const buttonBox = document.getElementById("button-box");
 
+    //Make button for every single phase
     for (let i = 0; i < vis.phases.length; i++) {
 
+        //Get phase name and phaseFnId
         split_phase = vis.phases[i].split("::");
-
         const phaseName = (split_phase[3]);
-
         const phaseId = vis.phaseIDs[i];
 
+        //Create the button and append it to HTML element
         const btn = document.createElement("button");
         btn.textContent = "Phase " + phaseId + ": " + phaseName;
         btn.className = "phase_btn";
         buttonBox.appendChild(btn);
 
+        //Add event listener that will update visualization for that phase when button is clicked
         btn.addEventListener("click", () => {
-            //vis.filter = Number(btn.textContent.split(" ")[1]);
+
             document.querySelectorAll(".phase_btn").forEach(b => b.classList.remove("selected"));
             btn.classList.add("selected");
 
