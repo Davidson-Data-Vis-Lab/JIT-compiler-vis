@@ -1,3 +1,8 @@
+// In renderVis, draw force directed graph diagram - in a separate file call a function that exists in another
+// And pass the data
+// At the top, have a button that has "Layout Algorithm" choices that will change the layout based on the user's choice
+// Buttons and tooltips stay the same - you can put those in a separate file
+// Look at lab for more information
 /**
  * Creates a very unorganized graph of all nodes and edges at the
  * very end of optimization of an IR file.
