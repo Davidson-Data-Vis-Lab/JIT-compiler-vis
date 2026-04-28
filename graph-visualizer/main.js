@@ -19,7 +19,7 @@ async function loadData() {
 
 async function graphBuilder() {
     const data = await loadData();
-    const nodes = data.nodes;
+    // const nodes = data.nodes;
     const phases = [];
     const phaseIDs = [];
     
