@@ -1,4 +1,26 @@
 # Agenda
+## Tues, May 5 - last day! Group meeting
+We'll make a list of the final coding TODOs and edits for READMEs (48 hours worth). Over the Exam Period, you should only be working on the [Poster Deliverable Specifications](https://docs.google.com/document/d/14zl3wYsOKsWY_auNssoloWtEfIbF8OW2TYotmk6d420/edit?usp=sharing).
+
+## Thurs, April 30 - canceled/asynchronous
+Send questions over Slack or stop by office hours 1-3 PM.
+
+## Tues, April 28 - Individual Meeting
+Ellora worked on Python-parsing code and verified it with the map in JS. She and Taft checked the nodes and edges and found some bugs. Fixed them. She merged the new formatting changes into main (tooltip, edges styling, button). 
+
+Ellora & Taft realized the trees are really shallow -- edges are generally strictly parent-child, no grandchildren. So Sugiyama doesn't make sense because there aren't mulitple levels in the graph. Suggestion is to move to force-directed instead. Found example of force-directed with directional straight arrows on Observable. 
+
+Taft commented a lot on main.js. Ellora made a readme for the processing code. 
+
+**TODO:**
+* Dr. W sends out the poster information by Thursday 9 AM
+* Due Thursday 1 PM: T&E read the poster information and Dr. W's feedback on their Intro + Related Work submissions (the PDFs have my red/blue comments, located in "Name - 395 Feedback"
+    * Stop by my lab from 1-3 PM on Thursday to ask questions. Otherwise, I'll answer questions asynchronously over Slack.
+* For coding:
+    * Work on modularizing the code base -- move any code related to drawing the IR graph to a separate JavaScript file. See the zip file example on Slack, which is a completed version of [Lab 7](https://docs.google.com/document/d/1W9aG4BCo4kh5WKXtipFZbDZLx2dM65Ek9fdffiTY6cI/edit?tab=t.0#heading=h.k3uixyfqpxt2). This completed version still isn't amazing, but it gives you the gist of how to have a barchart.js and a scatterplot.js to organize the code (I think barchart is still kind of acting as a main.js, but again, you get the gist).
+
+**No meeting on Thursday due to Dr. Williams' coding interviews.**
+  
 
 ## Thurs, April 23 - Group Meeting
 
