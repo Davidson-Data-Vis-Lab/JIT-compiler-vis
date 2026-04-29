@@ -21,89 +21,120 @@ async function loadData() {
   
 }
 
+function drag(simulation) {
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3.drag()
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended);
+}
+
 
 async function graphBuilder() {
-    const data = await loadData();
-    // const nodes = data.nodes;
-    const phases = [];
-    const phaseIDs = [];
+    let vis = this;
+
+    vis.data = await loadData();
+    vis.phases = [];
+    vis.phaseIDs = [];
     
-    getPhases(data, phaseIDs, phases);  // pass context explicitly
-    
-    const links = buildLinks(data, phaseIDs);  // pass context
-    const nodes = buildNodeLinks(data); 
+    getPhases(); 
 
-        const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.id))
-            .force("charge", d3.forceManyBody().strength(-300))
-            .force("x", d3.forceX())
-            .force("y", d3.forceY())
-            .force('collide', d3.forceCollide(d => 65))
+    vis.nodes = vis.data.nodes;
+    vis.links = buildLinks(); 
+    const types = ["basic"]
 
-        const svg = d3.create("svg")
-            .attr("viewBox", [-width / 2, -height / 2, width, height])
+    const links = vis.links.map(d => Object.create(d));
+    const nodes = vis.nodes.map(d => Object.create(d));
 
-        // Per-type markers, as they don't inherit styles.
-        svg.append("defs").selectAll("marker")
-            .data(types)
-            .join("marker")
-            .attr("id", d => `arrow-${d}`)
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 38)
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("fill", color)
-            .attr("d", 'M0,-5L10,0L0,5');
+    const width = 800;
+    const height = 800;
 
-        const link = svg.append("g")
-            .attr("fill", "none")
-            .attr("stroke-width", 1.5)
-            .selectAll("path")
-            .data(links)
-            .join("path")
-            .attr("stroke", d => color(d.type))
-            .attr("marker-end", d => `url(${new URL(`#arrow-${d.type}`, location)})`);
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("x", d3.forceX())
+        .force("y", d3.forceY())
+        .force('collide', d3.forceCollide(d => 65))
 
-        const node = svg.append("g")
-            .attr("fill", "currentColor")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-linejoin", "round")
-            .selectAll("g")
-            .data(nodes)
-            .join("g")
-            .call(drag(simulation));
+    const svg = d3.select("#chart-area")
+        .append("svg")
+        .attr("width", width * 1.5)
+        .attr("height", height * 1.5)
+        .attr("viewBox", [-width / 2, -height / 2, width, height])
 
-        node.append("circle")
-            .attr("stroke", "white")
-            .attr("stroke-width", 1.5)
-            .attr("r", 25)
-            .attr('fill', d => '#6baed6');
+    // Per-type markers, as they don't inherit styles.
+    svg.append("defs").selectAll("marker")
+        .data(types)
+        .join("marker")
+        .attr("id", d => `arrow-${d}`)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 38)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("fill", "black")
+        .attr("d", 'M0,-5L10,0L0,5');
 
-        node.append("text")
-            .attr("x", 30 + 4)
-            .attr("y", "0.31em")
-            .text(d => d.id)
-            .clone(true).lower()
-            .attr("fill", "none")
-            .attr("stroke", "white")
-            .attr("stroke-width", 3);
+    const link = svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke-width", 1.5)
+        .selectAll("path")
+        .data(links)
+        .join("path")
+        .attr("stroke", "black")
+        .attr("marker-end", d => `url(${new URL(`#arrow-${d.type}`, location)})`);
 
-        node.on('dblclick', (e, d) => console.log(nodes[d.index]))
+    const node = svg.append("g")
+        .attr("fill", "currentColor")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-linejoin", "round")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .call(drag(simulation));
+
+    node.append("circle")
+        .attr("stroke", "white")
+        .attr("stroke-width", 1.5)
+        .attr("r", 25)
+        .attr('fill', d => '#6baed6');
+
+    node.append("text")
+        .attr("x", 30 + 4)
+        .attr("y", "0.31em")
+        .text(d => d.id)
+        .clone(true).lower()
+        .attr("fill", "none")
+        .attr("stroke", "white")
+        .attr("stroke-width", 3);
+
+    node.on('dblclick', (e, d) => console.log(nodes[d.index]))
 
 
-        simulation.on("tick", () => {
-            link.attr("d", linkArc);
-            node.attr("transform", d => `translate(${d.x},${d.y})`);
-        });
+    simulation.on("tick", () => {
+        link.attr("d", d =>`M${d.source.x},${d.source.y}A0,0 0 0,1 ${d.target.x},${d.target.y}`);
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
 
-        invalidation.then(() => simulation.stop());
-
-        return svg.node();
-
-        buildNodeLinks();
+    //return svg.node();
 }
 
 
@@ -113,7 +144,6 @@ async function graphBuilder() {
 //  *
 //  * Returns the dictionary object
 //  */
-
 function organizeEdges() {
     let vis = this;
 
@@ -288,16 +318,6 @@ function organizeEdges() {
     return nodeEdges;
 }
 
-function buildNodeLinks() {    
-   let vis = this;
-    nodeArray = [];
-    vis.nodes.forEach(node => {
-        nodeArray.push(node);
-    }
-    )  
-    return nodeArray;
-}
-
 function buildLinks() {
     linksArray = [];
 
@@ -309,15 +329,15 @@ function buildLinks() {
 
        edges.forEach(sourceNode => {
         const link = {
-            sourcenode: sourceNode,
-            targetnode: i,
+            source: sourceNode,
+            target: i,
+            type: "basic"
         }
         linksArray.push(link)
        })
-        // linksArray[];
         i++;
     })
-    console.log(linksArray);
+
     return linksArray;
 
 }
