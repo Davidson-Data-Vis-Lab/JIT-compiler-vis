@@ -1,7 +1,7 @@
 /**
  * Tooltip and edge highlight on node hover.
- * bindTooltips() is called at the end of renderVis() (forcedirected.js)
- * so it always re-binds to fresh nodes after each phase change.
+ * Called from renderVis() in forcedirected.js after every render,
+ * so handlers are always bound to fresh nodes.
  * 
  * @author Ellora Devulapally, Taft Harrell
  */
@@ -43,17 +43,12 @@ function bindTooltips() {
             const optimizedPhasesStr =
                 optimizedPhases.size ? Array.from(optimizedPhases).sort((a, b) => a - b).join(", ") : "None";
 
-            // Highlight only edges connected to this node
+            // Highlight only edges connected to this node, hide all others
             vis.linkSelection
                 .attr("stroke-width", edgeD => {
                     const srcId = typeof edgeD.source === "object" ? edgeD.source.id : edgeD.source;
                     const tgtId = typeof edgeD.target === "object" ? edgeD.target.id : edgeD.target;
-                    return (srcId === d.id || tgtId === d.id) ? 3 : 0;
-                })
-                .attr("stroke", edgeD => {
-                    const srcId = typeof edgeD.source === "object" ? edgeD.source.id : edgeD.source;
-                    const tgtId = typeof edgeD.target === "object" ? edgeD.target.id : edgeD.target;
-                    return (srcId === d.id || tgtId === d.id) ? "#e05c00" : "black";
+                    return (srcId === d.id || tgtId === d.id) ? 2.5 : 0;
                 });
 
             d3.select('#sidebar')
@@ -73,10 +68,7 @@ function bindTooltips() {
                 `);
         })
         .on('mouseleave', () => {
-            vis.linkSelection
-                .attr("stroke-width", 1.5)
-                .attr("stroke", "black");
-
+            vis.linkSelection.attr("stroke-width", 1.5);
             d3.select('#sidebar').style('display', 'none');
         });
 }

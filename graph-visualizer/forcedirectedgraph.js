@@ -1,6 +1,6 @@
 /**
  * Force-directed graph renderer.
- * Called by updateVis() in main.js after vis.nodes and vis.links are set.
+ * Called by updateVis() in main.js.
  * Calls bindTooltips() from tooltip.js after drawing.
  * 
  * @author Ellora Devulapally, Taft Harrell
@@ -30,19 +30,39 @@ function drag(simulation) {
 function renderVis() {
     let vis = this;
 
-    // Determine which nodes are visible for this phase
-    const visibleNodes = vis.filter === "none"
-        ? vis.nodes
-        : vis.nodes.filter(n => vis.phaseNodes.has(n.id));
+    // Determine which nodes to show for the current phase
+    let visibleNodes;
 
+    if (vis.filter === "none") {
+        // Show all nodes
+        visibleNodes = vis.nodes;
+    } else {
+        // Show only nodes in the current phase
+        visibleNodes = vis.nodes.filter(n => vis.phaseNodes.has(n.id));
+    }
+
+    // List of arrow types --> normal use for copying data for physics simulation 
     const types = ["basic"];
-    const links = vis.links.map(d => Object.create(d));
-    const nodes = visibleNodes.map(d => Object.create(d));
 
-    const width = 1000;
+    // Create copies of all links
+    const links = [];
+    for (let i = 0; i < vis.links.length; i++) {
+        const originalLink = vis.links[i];
+        const linkCopy = Object.create(originalLink);
+        links.push(linkCopy);
+    }
+
+    // Create copies of all nodes
+    const nodes = [];
+    for (let i = 0; i < visibleNodes.length; i++) {
+        const originalNode = visibleNodes[i];
+        const nodeCopy = Object.create(originalNode);
+        nodes.push(nodeCopy);
+    }
+    const width = 800;
     const height = 800;
 
-    // Clear and rebuild SVG each render
+    // Clear and rebuild the SVG on every render
     d3.select("#chart-area").select("svg").remove();
 
     const simulation = d3.forceSimulation(nodes)
@@ -107,15 +127,14 @@ function renderVis() {
         .attr("stroke", "white")
         .attr("stroke-width", 3);
 
-
-    // node.on('dblclick', (e, d) => console.log(nodes[d.index]));
+    node.on('dblclick', (e, d) => console.log(nodes[d.index]));
 
     simulation.on("tick", () => {
         link.attr("d", d => `M${d.source.x},${d.source.y}A0,0 0 0,1 ${d.target.x},${d.target.y}`);
         node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
 
-    // Store selections on vis so tooltip.js can access them
+    // Store on vis so tooltip.js can bind hover handlers to these elements
     vis.nodeSelection = node;
     vis.linkSelection = link;
 

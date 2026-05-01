@@ -1,7 +1,8 @@
 /**
- * Main visualization file - manages data loading, phase logic, and orchestration.
- * renderVis() calls into forcedirected.js to draw the graph.
- * Buttons: buttons.js | Tooltip: tooltip.js
+ * Main visualization file.
+ * Handles data loading, phase logic (organizeEdges, determineNodeActiveStatus),
+ * and initVis -> updateVis -> renderVis
+ * 
  * 
  * @author Ellora Devulapally, Taft Harrell
  */
@@ -9,9 +10,9 @@
 let IR_data;
 
 async function loadData() {
-  IR_data = await d3.json("../toy-datasets/IR/ir-after-spring-break.json");
-  console.log("loaded the data", IR_data);
-  return IR_data;
+    IR_data = await d3.json("../toy-datasets/IR/ir-after-spring-break.json");
+    console.log("loaded the data", IR_data);
+    return IR_data;
 }
 
 async function initVis() {
@@ -96,8 +97,15 @@ function organizeEdges() {
         const first_instruction_phase = node_instructions[first_instruction].phaseFnId;
 
         var edge_relevant_instructions = [];
-        for (const instruction of node_removed) edge_relevant_instructions.push(instruction);
-        for (const instruction of node_replaced) edge_relevant_instructions.push(instruction);
+
+        for (const instruction of node_removed) {
+            edge_relevant_instructions.push(instruction);
+        }
+
+        for (const instruction of node_replaced) {
+            edge_relevant_instructions.push(instruction);
+        }
+
         edge_relevant_instructions.sort((a, b) => Number(a[0]) - Number(b[0]));
 
         var phaseNumber = 0;
@@ -126,23 +134,30 @@ function organizeEdges() {
                 }
             }
 
-            if (node_replaced.length != 0 && node_replaced.includes(instruction)) {
-                const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
-                if (replacedEntry) {
-                    var instruction = replacedEntry[1];
-                    var edges = phaseDictionary.get(instructionPhase).slice();
-                    edges[instruction.position] = instruction.to;
-                    phaseDictionary.set(instructionPhase, edges);
+            if (node_replaced.length != 0) {
+                if (node_replaced.includes(instruction)) {
+                    const replacedEntry = node_replaced.find(([key]) => key === instructionID.toString());
+                    if (replacedEntry) {
+                        var instruction = replacedEntry[1];
+                        var edgePosition = instruction.position;
+                        var newValue = instruction.to;
+                        var edges = phaseDictionary.get(instructionPhase).slice();
+                        edges[edgePosition] = newValue;
+                        phaseDictionary.set(instructionPhase, edges);
+                    }
                 }
             }
 
-            if (node_removed.length != 0 && node_removed.includes(instruction)) {
-                const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
-                if (removedEntry) {
-                    var instruction = removedEntry[1];
-                    var edges = phaseDictionary.get(instructionPhase);
-                    edges.splice(edges.indexOf(instruction.nodeId), 1);
-                    phaseDictionary.set(instructionPhase, edges);
+            if (node_removed.length != 0) {
+                if (node_removed.includes(instruction)) {
+                    const removedEntry = node_removed.find(([key]) => key === instructionID.toString());
+                    if (removedEntry) {
+                        var instruction = removedEntry[1];
+                        var removedNode = instruction.nodeId;
+                        var edges = phaseDictionary.get(instructionPhase);
+                        edges.splice(edges.indexOf(removedNode), 1);
+                        phaseDictionary.set(instructionPhase, edges);
+                    }
                 }
             }
         });
