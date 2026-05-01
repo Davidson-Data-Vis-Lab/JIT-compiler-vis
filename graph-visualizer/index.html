@@ -7,14 +7,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id = "tooltip"></div>
-    <div id = "mainFlexBox">
-         <div id = "chart-area"></div>
-         <div id = "button-box"></div>
+    <div id="sidebar" style="display:none; position:absolute; background:white; border:1px solid #ccc; padding:10px; border-radius:6px; pointer-events:none;"></div>
+    <div id="mainFlexBox">
+        <div id="chart-area"></div>
+        <div id="button-box"></div>
     </div>
-    <div>
-        <script src="d3.v6.min.js"></script>
-        <script src="forcedirectedgraph.js"></script>
-    </div>
+
+    <script src="d3.v6.min.js"></script>
+    <script src="buttons.js"></script>
+    <script src="tooltip.js"></script>
+    <script src="forcedirectedgraph.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
