@@ -51,7 +51,7 @@ function bindTooltips() {
                     return (srcId === d.id || tgtId === d.id) ? 2.5 : 0;
                 });
 
-            d3.select('#sidebar')
+            d3.select('#tooltip-box')
                 .style('display', 'block')
                 .style('left', (event.pageX) + 'px')
                 .style('top', (event.pageY) + 'px')
@@ -69,6 +69,6 @@ function bindTooltips() {
         })
         .on('mouseleave', () => {
             vis.linkSelection.attr("stroke-width", 1.5);
-            d3.select('#sidebar').style('display', 'none');
+            d3.select('#tooltip-box').style('display', 'none');
         });
 }

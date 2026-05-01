@@ -7,10 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="sidebar" style="display:none; position:absolute; background:white; border:1px solid #ccc; padding:10px; border-radius:6px; pointer-events:none;"></div>
+    <div id="sidebar"></div>
     <div id="mainFlexBox">
         <div id="chart-area"></div>
-        <div id="button-box"></div>
+            <div id="SidebarFlex">
+                <div id="button-box"></div>
+                <div id="tooltip-box"></div>
+            </div>
     </div>
 
     <script src="d3.v6.min.js"></script>

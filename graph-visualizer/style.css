@@ -1,22 +1,31 @@
 
+#SidebarFlex {
+    display: flex;
+    flex-direction: column;
+    width: 260px;          
+    margin-right: 20px;   
+}
+
+#tooltip-box {
+    margin-top: 20px;          
+    padding: 14px;            
+    background: #fafafa;       
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: "Inter", "Segoe UI", sans-serif;  
+    font-size: 15px;           
+    line-height: 1.5;          
+    color: #333;
+    display: none;             
+}
+
+
+
 .node:hover {
     stroke: black;
     stroke-width: 3px;
 }
 
-#tooltip {
-    position: absolute;
-    display: none;
-    background: #ffffff;
-    box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
-    border: 2px solid #000000;
-    font-size: 20px;
-    font-weight: 500;
-    padding: 8px;
-    min-width: 160px;
-    color: #333;
-    z-index: 5 !important;
-}
 
 .phase_btn {
     padding: 10px 10px;
@@ -46,15 +55,10 @@
     width: 1400px;
 }
 
-#chart-area {
-    display: flex;
-}
-
 #button-box {
     position: relative;
-    transform:translate(0px, 40px)
-}
-
-#SVG{
-    outline: solid black 3px;
+    transform:translate(0px, 40px);
+    margin-bottom: 20px; 
+    height: 250px;
+    overflow-y: auto; /* Adds a vertical scrollbar if content overflows */
 }
