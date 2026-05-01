@@ -20,6 +20,13 @@ function createButtons() {
         const btn = document.createElement("button");
         btn.textContent = "Phase " + phaseId + ": " + phaseName;
         btn.className = "phase_btn";
+
+        if (i == vis.phases.length - 1) {
+
+            btn.classList.add("selected");
+
+        }
+
         buttonBox.appendChild(btn);
 
         btn.addEventListener("click", () => {

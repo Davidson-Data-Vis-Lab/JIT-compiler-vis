@@ -59,21 +59,32 @@ function renderVis() {
         const nodeCopy = Object.create(originalNode);
         nodes.push(nodeCopy);
     }
-    const width = 800;
-    const height = 800;
+
+    const width = 700;
+    const height = 550;
+    const nodeRadius = 10;
+    var collisionForce = (100 - Math.floor(nodes.length)) / 1.5;
+    if(collisionForce < 30) {
+        collisionForce = 30;
+    }
+    const collisionStrength = -100;
+
+    console.log(collisionForce);
+
 
     // Clear and rebuild the SVG on every render
     d3.select("#chart-area").select("svg").remove();
 
     const simulation = d3.forceSimulation(nodes)
         .force("link", d3.forceLink(links).id(d => d.id))
-        .force("charge", d3.forceManyBody().strength(-300))
+        .force("charge", d3.forceManyBody().strength(collisionStrength))
         .force("x", d3.forceX())
         .force("y", d3.forceY())
-        .force('collide', d3.forceCollide(d => 65));
+        .force('collide', d3.forceCollide(d => collisionForce));
 
     const svg = d3.select("#chart-area")
         .append("svg")
+        .attr("id", "SVG")
         .attr("width", width * 1.5)
         .attr("height", height * 1.5)
         .attr("viewBox", [-width / 2, -height / 2, width, height]);
@@ -115,7 +126,7 @@ function renderVis() {
     node.append("circle")
         .attr("stroke", "white")
         .attr("stroke-width", 1.5)
-        .attr("r", 25)
+        .attr("r", nodeRadius)
         .attr('fill', d => '#6baed6');
 
     node.append("text")

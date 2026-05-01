@@ -26,6 +26,9 @@ async function initVis() {
     vis.phaseIDs = [];
     getPhases();
 
+    //Set vis.filter equal to the last phase of optimization to show the graph after the end of optimization
+    vis.filter = Number(vis.phaseIDs[vis.phases.length - 1]);
+
     vis.nodes = vis.data.nodes;
     vis.nodeEdges = organizeEdges();
     vis.activeNodesByPhase = determineNodeActiveStatus();

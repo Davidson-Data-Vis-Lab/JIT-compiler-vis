@@ -46,7 +46,15 @@
     width: 1400px;
 }
 
+#chart-area {
+    display: flex;
+}
+
 #button-box {
     position: relative;
     transform:translate(0px, 40px)
+}
+
+#SVG{
+    outline: solid black 3px;
 }
