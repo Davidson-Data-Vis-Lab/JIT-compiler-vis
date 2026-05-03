@@ -3,7 +3,8 @@
     display: flex;
     flex-direction: column;
     width: 260px;          
-    margin-right: 20px;   
+    margin-right: 20px; 
+    margin-top: 50px;  
 }
 
 #tooltip-box {
@@ -16,36 +17,39 @@
     font-size: 15px;           
     line-height: 1.5;          
     color: #333;
-    display: none;             
+    display: none;       
+    width: 375px;      
 }
-
-
 
 .node:hover {
     stroke: black;
     stroke-width: 3px;
 }
 
+#phaseDropDown {
+    padding: 10px 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    border-radius: 5px;
+    width: 400px;
+}
 
-.phase_btn {
+#phaseConfirmation {
     padding: 10px 10px;
     margin-top: 5px;
     margin-bottom: 5px;
     margin-right: 5px;
     margin-left: 5px;
     border-radius: 75px;
+    width: 400px;
 }
 
-.phase_btn:hover {
+#phaseConfirmation:hover {
     cursor: pointer;
     background-color: #00b3b3;
 }
-
-.phase_btn.selected {
-    background-color: #00b3b3;
-    border: 2px solid #006666;
-    color: white;
-  }
 
 #mainFlexBox {
     display: flex;
@@ -53,12 +57,4 @@
     justify-content: flex-start;
     max-height: 1000px;
     width: 1400px;
-}
-
-#button-box {
-    position: relative;
-    transform:translate(0px, 40px);
-    margin-bottom: 20px; 
-    height: 250px;
-    overflow-y: auto; /* Adds a vertical scrollbar if content overflows */
 }

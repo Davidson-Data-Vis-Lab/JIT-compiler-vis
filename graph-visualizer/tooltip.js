@@ -6,6 +6,7 @@
  * @author Ellora Devulapally, Taft Harrell
  */
 
+//TODO: Need to add comments for these two functions below
 function getPhasesForInstType(node, type) {
     const phases = new Set();
     for (const rec of Object.values(node.instAccess || {})) {
@@ -19,19 +20,20 @@ function getFirstPhaseForInstType(node, type) {
     return phases.length ? phases[0] : null;
 }
 
+/**
+ * Tooltip logic for displaying information about a node.
+ */
 function bindTooltips() {
     let vis = this;
 
+    //Types are specified in Dr. Lim's JSON specification file
     const CREATE = 7;
     const KILL = 3;
     const OPT_TYPES = new Set([0, 1, 2, 4, 6]);
 
     vis.nodeSelection
         .on('mouseover', (event, d) => {
-            const alive_status =
-                vis.filter != "none"
-                    ? vis.phaseNodes.has(d.id) ? "True" : "False"
-                    : "True";
+            const alive_status = vis.phaseNodes.has(d.id) ? "True" : "False";
 
             const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
             const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
@@ -48,9 +50,10 @@ function bindTooltips() {
                 .attr("stroke-width", edgeD => {
                     const srcId = typeof edgeD.source === "object" ? edgeD.source.id : edgeD.source;
                     const tgtId = typeof edgeD.target === "object" ? edgeD.target.id : edgeD.target;
-                    return (srcId === d.id || tgtId === d.id) ? 2.5 : 0;
+                    return (srcId === d.id || tgtId === d.id) ? 1.5 : 0;
                 });
 
+            //Display node information here
             d3.select('#tooltip-box')
                 .style('display', 'block')
                 .style('left', (event.pageX) + 'px')
@@ -67,6 +70,7 @@ function bindTooltips() {
                     </ul>
                 `);
         })
+        //Hide tooltip and change boldness of edges
         .on('mouseleave', () => {
             vis.linkSelection.attr("stroke-width", 1.5);
             d3.select('#tooltip-box').style('display', 'none');
