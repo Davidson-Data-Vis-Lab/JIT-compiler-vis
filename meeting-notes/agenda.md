@@ -2,7 +2,19 @@
 ## Tues, May 5 - last day! Group meeting
 We'll make a list of the final coding TODOs and edits for READMEs (48 hours worth). Over the Exam Period, you should only be working on the [Poster Deliverable Specifications](https://docs.google.com/document/d/14zl3wYsOKsWY_auNssoloWtEfIbF8OW2TYotmk6d420/edit?usp=sharing).
 
-TODO: get email addresses, check PCS accounts, save the PPT and Overleaf links somewhere findable. Add all outstanding issues to the GitHub repo. Add comments to code and READMEs. Give TODOs through Thursday (~2 hours of work).
+TODO: get email addresses, check PCS accounts, save the PPT and Overleaf links somewhere findable. Add all outstanding issues to the GitHub repo. Add comments to code and READMEs. Give TODOs through Thursday.
+
+T&E discussed feedback about their related work/intro. 
+
+T&E got the force-directed graph to visualize. Some of the forces are hard-coded w.r.t. the number of nodes that we have in our example dataset. Arrowheads were in the middle of the edge, but they got it to move. They did have a hover effect, but it affected the arrowhead size so they removed it. KPW: review collisionStrength to see placement of nodes/edges.
+
+The added field is not included, but we might want to add this attribute if we work with different IRs. 
+
+TODO: delete unused branches, add to README so that future people know what is in each directory and where is the vis, and how to load the different versions of the graph visualization (or Ellora is going to add a dropdown on the webpage so that the user can choose grid or force-directed graph). 
+
+TODO: Ellora wants to continue to modularize the code to allow that swapping. 
+
+TODO: draw figures for the paper. Get screenshots of the whole vis, of parts that highlight features, add timeline/flow diagram of how we get the data, include the code POC.js file in the text, add an infographic for how JIT compilers work?
 
 ## Thurs, April 30 - canceled/asynchronous
 Send questions over Slack or stop by office hours 1-3 PM.
