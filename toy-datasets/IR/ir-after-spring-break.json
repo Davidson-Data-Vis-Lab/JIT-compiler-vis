@@ -17,7 +17,12 @@
             "opcode_log": {
                 "12595456": "0"
             },
-            "added": {},
+            "added": {
+                 "10512": {
+                    "nodeId": 11,
+                    "position": 0
+                }
+            },
             "removed": {},
             "replaced": {},
             "directValueOpt": {

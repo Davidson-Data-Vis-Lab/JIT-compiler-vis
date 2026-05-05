@@ -105,9 +105,9 @@ function organizeEdges() {
         const phaseDictionary = new Map();
         nodeEdges.set(node.id, phaseDictionary);
 
-        //Get all removed and replaced instructions -- TODO: update to consider added
         const node_removed = Array.from(Object.entries(node.removed));
         const node_replaced = Array.from(Object.entries(node.replaced));
+        const node_added = Array.from(Object.entries(node.added));
         node_instructions = node.instAccess;
 
         //Retrieve first instruction in which node was created
@@ -122,6 +122,10 @@ function organizeEdges() {
         }
 
         for (const instruction of node_replaced) {
+            edge_relevant_instructions.push(instruction);
+        }
+
+        for (const instruction of node_added) {
             edge_relevant_instructions.push(instruction);
         }
 
@@ -189,6 +193,23 @@ function organizeEdges() {
                     }
                 }
             }
+
+            //Carry out added instruction
+            if (node_added.length != 0) {
+                console.log("yo");
+                if (node_added.includes(instruction)) {
+                    const addedEntry = node_added.find(([key]) => key === instructionID.toString());
+                    if (addedEntry) {
+                        var instruction = addedEntry[1];
+                        var addedNode = instruction.nodeId;
+                        var position = instruction.position;
+                        var edges = phaseDictionary.get(instructionPhase);
+                        edges[position] = addedNode;
+                        phaseDictionary.set(instructionPhase, edges);
+                    }
+                }
+            }
+
         });
 
         //In the case that a node doesn't go through optimization, set all phases after in which node was created
