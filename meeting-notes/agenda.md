@@ -2,6 +2,8 @@
 ## Tues, May 5 - last day! Group meeting
 We'll make a list of the final coding TODOs and edits for READMEs (48 hours worth). Over the Exam Period, you should only be working on the [Poster Deliverable Specifications](https://docs.google.com/document/d/14zl3wYsOKsWY_auNssoloWtEfIbF8OW2TYotmk6d420/edit?usp=sharing).
 
+TODO: get email addresses, check PCS accounts, save the PPT and Overleaf links somewhere findable. Add all outstanding issues to the GitHub repo. Add comments to code and READMEs. Give TODOs through Thursday (~2 hours of work).
+
 ## Thurs, April 30 - canceled/asynchronous
 Send questions over Slack or stop by office hours 1-3 PM.
 
