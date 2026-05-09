@@ -1,13 +1,13 @@
 /**
  * Main visualization file.
- * Handles data loading, phase logic (organizeEdges, determineNodeActiveStatus),
- * and initVis -> updateVis -> renderVis
- * 
+ * Handles data loading, phase logic, visualization type selection,
+ * and coordinates between different visualization modes.
  * 
  * @author Ellora Devulapally, Taft Harrell
  */
 
 let IR_data;
+let currentVisualization = 'force-directed'; // default visualization type
 
 /**
  * Load data and wait for it to load before calling any other functions
@@ -42,7 +42,33 @@ async function initVis() {
     vis.activeNodesByPhase = determineNodeActiveStatus();
 
     fillSelectionBox();  // buttons.js
+    setupVisualizationToggle(); // Setup visualization type selector
     updateVis();
+}
+
+/**
+ * Setup the visualization type toggle between static and force-directed
+ */
+function setupVisualizationToggle() {
+    const toggleButton = document.getElementById("visTypeToggle");
+    const currentVisType = document.getElementById("currentVisType");
+    
+    if (toggleButton) {
+        toggleButton.addEventListener("click", () => {
+            // Toggle between visualization types
+            currentVisualization = (currentVisualization === 'force-directed') ? 'static' : 'force-directed';
+            
+            // Update button text
+            if (currentVisType) {
+                currentVisType.textContent = currentVisualization === 'force-directed' 
+                    ? 'Force-Directed' 
+                    : 'Static';
+            }
+            
+            // Re-render with new visualization type
+            renderVis();
+        });
+    }
 }
 
 /**
@@ -62,7 +88,6 @@ function updateVis() {
         const phaseDictionary = vis.nodeEdges.get(node.id);
         let activeEdges = null;
 
-        //TODO: Add more comments for this function to explain what it's doing
         const phases = Array.from(phaseDictionary.keys())
             .map(Number)
             .sort((a, b) => a - b);
@@ -83,7 +108,18 @@ function updateVis() {
 
     vis.links = phaseEdges.map(([s, t]) => ({ source: s, target: t, type: "basic" }));
 
-    renderVis();  // forcedirected.js
+    renderVis();
+}
+
+/**
+ * Delegates rendering to the appropriate visualization type
+ */
+function renderVis() {
+    if (currentVisualization === 'force-directed') {
+        renderForceDirectedVis();  // forcedirected.js
+    } else {
+        renderStaticVis();  // static.js
+    }
 }
 
 /**
@@ -268,7 +304,7 @@ function determineNodeActiveStatus() {
     for (const phase of phases) {
         activeNodesByPhase.set(phase, new Set());
     }
-    //TODO: Can we merge these two for loops?
+    
     for (const phase of phases) {
         vis.nodes.forEach(node => {
             //Look through all of a node's instructions and find where type == 3 or 7.

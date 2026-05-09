@@ -1,6 +1,6 @@
 /**
  * Force-directed graph renderer.
- * Called by updateVis() in main.js.
+ * Called by renderVis() in main.js when force-directed mode is selected.
  * Calls bindTooltips() from tooltip.js after drawing.
  * 
  * @author Ellora Devulapally, Taft Harrell
@@ -34,16 +34,14 @@ function drag(simulation) {
 }
 
 /**
- * Creates nodes and links and draws onto SVG. Handles drag physics.
+ * Creates nodes and links and draws onto SVG using force-directed layout. 
+ * Handles drag physics.
  */
-function renderVis() {
+function renderForceDirectedVis() {
     let vis = this;
 
     // Determine which nodes to show for the current phase
-    let visibleNodes;
-
-    // Show only nodes in the current phase
-    visibleNodes = vis.nodes.filter(n => vis.phaseNodes.has(n.id));
+    let visibleNodes = vis.nodes.filter(n => vis.phaseNodes.has(n.id));
 
     // List of arrow types --> normal use for copying data for physics simulation 
     const types = ["basic"];
@@ -73,7 +71,6 @@ function renderVis() {
         collisionForce = 30;
     }
     const collisionStrength = -100;
-
 
     // Clear and rebuild the SVG on every render
     d3.select("#chart-area").select("svg").remove();
