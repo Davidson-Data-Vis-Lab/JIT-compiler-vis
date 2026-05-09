@@ -1,39 +1,36 @@
-
-#SidebarFlex {
-    display: flex;
-    flex-direction: column;
-    width: 260px;          
-    margin-right: 20px; 
-    margin-top: 50px;  
-}
-
-#tooltip-box {
-    margin-top: 20px;          
-    padding: 14px;            
-    background: #fafafa;       
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: "Inter", "Segoe UI", sans-serif;  
-    font-size: 15px;           
-    line-height: 1.5;          
-    color: #333;
-    display: none;       
-    width: 375px;      
-}
-
 .node:hover {
     stroke: black;
     stroke-width: 3px;
 }
+/* 
+#tooltip {
+    position: absolute;
+    display: none;
+    background: #ffffff;
+    box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
+    border: 2px solid #000000;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 8px;
+    min-width: 160px;
+    color: #333;
+    z-index: 5 !important;
+} */
 
-#phaseDropDown {
-    padding: 10px 10px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-right: 5px;
-    margin-left: 5px;
-    border-radius: 5px;
-    width: 400px;
+#sidebar {
+    display: none;
+    width: 260px;
+    min-height: 200px;
+    background: #ffffff;
+    border: 2px solid #000000;
+    box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px;
+    color: #333;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
 }
 
 #phaseConfirmation {
@@ -51,10 +48,23 @@
     background-color: #00b3b3;
 }
 
-#mainFlexBox {
+.phase_btn.selected {
+    background-color: #00b3b3;
+    border: 2px solid #006666;
+    color: white;
+  }
+
+  #mainFlexBox {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: flex-start;
     max-height: 1000px;
     width: 1400px;
+    gap: 16px;
+}
+
+#button-box {
+    position: relative;
+    transform:translate(0px, 40px)
 }

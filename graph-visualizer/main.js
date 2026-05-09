@@ -133,13 +133,147 @@ function updateVis() {
     renderVis();
 }
 
+    // Remove only the visual elements, not the defs
+    vis.svg.selectAll("circle").remove();
+    vis.svg.selectAll("text").remove();
+    vis.svg.selectAll("path").remove();
+    vis.svg.selectAll("polygon").remove();
 
-function renderVis() {
-    if (currentVisualization === 'static') {
-        renderStaticVis();      // static.js
-    } else {
-        renderForceDirectedVis(); // forcedirected.js
-    }
+    // Re-add the arrow marker definition (since it was removed)
+    vis.svg.select("defs").remove(); // Remove old defs
+    vis.svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 5)
+        .attr("refY", 0)
+        .attr("markerWidth", 2.5)
+        .attr("markerHeight", 2.5)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#ff0000");
+
+    // Drawing circles out onto screen
+    vis.svg.selectAll("circle")
+        .data(vis.nodes)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("cx", (d, i) => vis.circles[i].x)
+        .attr("cy", (d, i) => vis.circles[i].y)
+        .attr("r", radius) 
+        .attr("fill", "#ADD8E6")
+        .attr("opacity", (d) => {
+            if (vis.filter == "none") {
+                return 1;
+            }
+            else {
+                if (vis.phaseNodes.has(d.id)) {
+                    return 1;
+                }
+                else {
+                    return 0.1;
+                }
+            }
+        });
+
+    //Add node IDs to visualized nodes
+    vis.svg.selectAll("text")
+        .data(vis.nodes)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", (d, i) => {
+            if (d.id < 10) {
+                return vis.circles[i].x - 5;
+            }
+            return vis.circles[i].x - 7;
+        })
+        .attr("y", (d, i) => vis.circles[i].y - 10)
+        .attr("fill", "black")
+        .style("font-size", "20px")
+        .text(d => d.id);
+    
+    // Draw the paths with arrows (ONLY ONCE!)
+    vis.svg.selectAll("path.edge")
+        .data(vis.links)
+        .enter()
+        .append("path")
+        .attr("class", "edge")
+        .attr("d", vis.linkPath)
+        .attr("fill", "none")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", 0.5)
+        .attr("marker-end", "url(#arrow)");
+
+    //Hover effect for nodes
+    const nodes = vis.svg.selectAll(".node");
+    const edges = vis.svg.selectAll(".edge");
+
+    nodes
+    .on('mouseover', (event, d) => {
+        const alive_status = 
+            vis.filter != "none"
+                ? vis.phaseNodes.has(d.id) ? "True" : "False"
+                : "True";
+    
+        const CREATE = 7;
+        const KILL   = 3;
+
+        const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
+        const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
+
+        const OPT_TYPES = new Set([0, 1, 2, 4, 6]); 
+
+        const optimizedPhases = new Set();
+        for (const rec of Object.values(d.instAccess || {})) {
+            if (OPT_TYPES.has(rec.type)) optimizedPhases.add(Number(rec.phaseFnId));
+        }
+        const optimizedPhasesStr =
+            optimizedPhases.size ? Array.from(optimizedPhases).sort((a,b)=>a-b).join(", ") : "None";  
+    
+        const nodeXPosition = vis.circles[d.id]["x"];
+        const nodeYPosition = vis.circles[d.id]["y"];
+        
+        vis.iterableEdges = edges._groups[0];
+        vis.iterableEdges.forEach(edge => {
+            edge.setAttribute("stroke-width", 0);
+            const edgeSourceXPosition = edge.__data__["source"]["x"];
+            const edgeSourceYPosition = edge.__data__["source"]["y"];
+            const edgeTargetXPosition = edge.__data__["target"]["x"];
+            const edgeTargetYPosition = edge.__data__["target"]["y"];
+    
+            if ((edgeSourceXPosition == nodeXPosition && edgeSourceYPosition == nodeYPosition) ||
+                (edgeTargetXPosition == nodeXPosition && edgeTargetYPosition == nodeYPosition)) {
+                edge.setAttribute("stroke-width", 2.5);
+            }
+        });
+        
+        //Tooltip selection
+        d3.select('#sidebar')
+            .style('display', 'block')
+            .style('left', (event.pageX) + 'px')
+            .style('top', (event.pageY) + 'px')
+            .html(`
+                <ul>
+                  <li><strong>Node ID:</strong> ${d.id}</li>
+                  <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+                  <li><strong>Alive?:</strong> ${alive_status}</li>
+                  <li><strong>Size:</strong> ${d.size} bytes</li>
+                  <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+                  <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
+                  <li><strong>Killed in Phase:</strong> ${killPhase}</li>
+                </ul>
+              `);
+    })
+    .on('mouseleave', () => {
+        vis.iterableEdges.forEach(edge => {
+            edge.setAttribute("stroke-width", 0.5);
+        });
+
+        d3.select('#sidebar').style('display', 'none');
+    });
 }
 
 /**
@@ -254,7 +388,10 @@ function organizeEdges() {
                 }
             }
         }
-    });
+        
+
+    })
+    console.log(nodeEdges);
 
     return nodeEdges;
 }

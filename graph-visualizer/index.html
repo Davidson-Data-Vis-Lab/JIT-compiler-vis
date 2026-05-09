@@ -8,17 +8,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="mainFlexBox">
-        <div id="chart-area"></div>
-        <div id="SidebarFlex">
-            <label for="phaseDropDown">Select phase:</label>
-            <select name="phase" id="phaseDropDown"></select>
-            <button id="phaseConfirmation">Update Visualization</button>
-            <button id="visTypeToggle">
-                Switch to <span id="currentVisType">Force-Directed</span> View
-            </button>
-            <div id="tooltip-box"></div>
-        </div>
+    <!-- <div id = "tooltip"></div> -->
+    <div id = "mainFlexBox">
+         <div id = "chart-area"></div>
+         <div id = "button-box"></div>
+         <div id="sidebar"></div> 
+    </div>
+    <div>
+        <script src="d3.v6.min.js"></script>
+        <script src="main.js"></script>
     </div>
 
     <script src="main.js"></script>
