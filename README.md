@@ -4,29 +4,29 @@
 
 ```
 JIT-compiler-vis/
+├── data-processing/
+│   └── parseIR.py/     # A python file that reconstructs the edges of an IR based on an input JSON file (used to verify our main.js file which builds a map of all phase-based edges between nodes)
+    └── result.json/    # The output of parseIR.py
 ├── graph-visualizer/       # D3.js visualization of the IR graph (see README inside)
 │   ├── index.html
 │   ├── main.js             # Data loading, phase logic, view toggle
 │   ├── static.js           # Static grid renderer
 │   ├── forcedirected.js    # Force-directed renderer
 │   ├── buttons.js          # Phase dropdown UI
-│   ├── tooltip.js          # Node hover tooltips (force-directed mode)
+│   ├── tooltip.js          # Node hover tooltips for the force-directed graph
 │   └── style.css
+├── meeting-notes/
+│   └── agenda.md/  # Agenda for spring semester 2025 - contains all notes from group and individual meetings
 ├── toy-datasets/
 │   └── IR/
-│       ├── ir-after-spring-break.json   # Primary dataset (updated post-spring-break)
-│       ├── ir5129.json                  # Additional test IR
-│       ├── phase_grouper.py             # Groups phases from raw IR data
-│       └── test_stepthrough.py          # Steps through IR instructions for debugging
+│       ├── ir-after-spring-break.json   # Primary dataset 
+│       ├── ir5129.json                  # Beta test IR
+│       ├── phase_grouper.py             # Beta phase grouper (from when we were trying to understand the IR)
+│       └── test_stepthrough.py          # Steps through IR instructions for debugging (from when we were trying to understand the IR)
 └── PoC/
     └── poc5129.js          # Proof-of-concept for IR 5129
+└── draw_phase_graphs.py/   # Dr. Lim's Python code used to generate static PNGs of nodes and edges created in each phase given an IR (used to verify our visualizer)
 ```
-
-## Getting Started
-
-1. Clone the repository and open `graph-visualizer/index.html` in a browser **via a local server** (e.g. `python3 -m http.server` or the VS Code Live Server extension). Opening the HTML file directly will fail due to the `d3.json()` data fetch.
-2. The visualizer loads `toy-datasets/IR/ir-after-spring-break.json` by default. To use a different IR file, update the path in `loadData()` in `main.js`.
-3. See `graph-visualizer/README.md` for a full explanation of the codebase.
 
 ## Data Files
 
