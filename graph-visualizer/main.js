@@ -12,16 +12,25 @@
 let IR_data;
 let currentVisualization = 'static'; // default view
 
-// ─── Data loading ─────────────────────────────────────────────────────────────
+// LOADING DATA 
 
+
+/**
+ * Load data and wait for it to load before calling any other functions
+ * 
+ * @returns the loaded data from the JSON
+ */
 async function loadData() {
     IR_data = await d3.json("../toy-datasets/IR/ir-after-spring-break.json");
     console.log("loaded the data", IR_data);
     return IR_data;
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-
+// INITIALIZE DATA
+/**
+ * Initializes the visualization by parsing through the data, getting all phases and phaseIDs, setting
+ * initial phase to display, get all nodes and edges, and create options in the HTML select element.
+ */
 async function initVis() {
     let vis = this;
 
@@ -38,8 +47,7 @@ async function initVis() {
     vis.nodeEdges = organizeEdges();
     vis.activeNodesByPhase = determineNodeActiveStatus();
 
-    // ── vis.circles: fixed grid positions keyed by node array index.
-    //    Used by the static renderer (same formula as original main.js).
+    // vis.circles: fixed grid positions keyed by node array index.
     const radius = 35;
     const cols = 10;
     vis.circles = vis.nodes.map((node, i) => {
@@ -48,7 +56,7 @@ async function initVis() {
         return { x: cx, y: cy };
     });
 
-    // ── linkPath: used by static renderer to draw curved paths
+    // linkPath: used by static renderer to draw curved paths
     vis.linkPath = d3.linkHorizontal()
         .x(d => d.x)
         .y(d => d.y);
@@ -58,8 +66,10 @@ async function initVis() {
     updateVis();
 }
 
-// ─── Toggle ───────────────────────────────────────────────────────────────────
-
+/**
+ * A function that creates and updates the visualization toggle 
+ * Allowing the user to switch between two (or more) different vis types
+ */
 function setupVisualizationToggle() {
     const toggleButton = document.getElementById("visTypeToggle");
     const currentVisLabel = document.getElementById("currentVisType");
@@ -76,11 +86,9 @@ function setupVisualizationToggle() {
     }
 }
 
-// ─── Update ───────────────────────────────────────────────────────────────────
-
+// UPDATE VIS
 /**
- * Filters nodes and edges for the selected phase, then builds BOTH link formats
- * so either renderer can be called without re-filtering.
+ * Sorts through nodes and edges, filtering based on the phase the user has selected.
  */
 function updateVis() {
     let vis = this;
@@ -125,7 +133,6 @@ function updateVis() {
     renderVis();
 }
 
-// ─── Render dispatcher ────────────────────────────────────────────────────────
 
 function renderVis() {
     if (currentVisualization === 'static') {
@@ -135,7 +142,13 @@ function renderVis() {
     }
 }
 
-// ─── Shared data logic ────────────────────────────────────────────────────────
+/**
+ * Parses through the entire IR file and generates a data structure containing every single 
+ * node's incoming edges for every single phase.
+ * 
+ * @returns nodeEdges -- a dictionary of the following format: keys with node IDs, values as sub-dictionarys with
+ * keys as phase IDs, values as a list of incoming edges.
+ */
 
 function organizeEdges() {
     let vis = this;
@@ -246,6 +259,14 @@ function organizeEdges() {
     return nodeEdges;
 }
 
+/**
+ * Parses through all of the instructions for every node of the JSON file and identifies
+ * which nodes are alive and which are dead for every single phase.
+ * 
+ * @returns activeNodesByPhase -- a dictionary with keys as phase IDs and values as a set
+ * of node IDs representing all nodes alive during that phase.
+ */
+
 function determineNodeActiveStatus() {
     let vis = this;
 
@@ -275,6 +296,12 @@ function determineNodeActiveStatus() {
     return activeNodesByPhase;
 }
 
+/**
+ * Parses through the fnId2Name dictionary of the IR file to find all phase names
+ * and phase IDs of optimization that the compiler went through.
+ * 
+ * vis.phaseIDs and vis.phases are declared during initVis and are filled using this function.
+ */
 function getPhases() {
     let vis = this;
     const functionIds = Object.entries(vis.data["fnId2Name"]);
