@@ -136,7 +136,6 @@ function updateVis() {
     renderVis();
 }
 
-// ─── Render dispatcher ────────────────────────────────────────────────────────
 
 /**
  * Delegates rendering to the appropriate visualization type.
@@ -149,7 +148,6 @@ function renderVis() {
     }
 }
 
-// ─── Shared data logic ────────────────────────────────────────────────────────
 
 /**
  * Parses through the entire IR file and generates a data structure containing every single 
