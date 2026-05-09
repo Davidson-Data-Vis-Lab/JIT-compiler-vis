@@ -13,40 +13,17 @@ Or use the VS Code Live Server extension and open `index.html`.
 
 
 ## File Overview
-**`main.js`**: Loads data, computes phase/edge data structures, builds `vis.circles` and the link formats for each of the visualizations, and dispatches rendering to the proper vis files based on selected 
-| `static.js` | Renders a fixed grid layout. All nodes always rendered; dead nodes shown at low opacity. Tooltip and edge highlight use coordinate matching. |
-| `forcedirected.js` | Renders a physics-based force-directed layout. Only alive nodes shown. Drag to reposition nodes. |
-| `buttons.js` | Populates the phase dropdown and wires up the Update button. |
-| `tooltip.js` | Hover tooltip and edge highlighting for force-directed mode. |
-| `style.css` | Layout and styling. |
+**`main.js`:** Loads data, computes phase/edge data structures, builds `vis.circles` and the link formats for each of the visualizations, and dispatches rendering to the proper vis files based on selected 
+**`static.js`:** Renders a fixed grid layout, where dead nodes are shwon at a lower opacity. The code uses coordinate matching for the edge highlight and tooltip functions. These functions are internal to this vis while force directed outsources to different files (seen below).
+**`forcedirected.js`:** Renders a physics-based force-directed layout where only alive nodes are shown and the user can drag to reorient the nodes.
+**`buttons.js`:** Populates the phase dropdown menu and the Update button allowing the user to switch between phases. 
+**`tooltip.js`:** Hover tooltip and edge highlighting specifically for the force-directed node graph.
+**`style.css`:** Layout and styling. 
 
-## Architecture
-
-All state lives on the global `vis` object (`window`). The main data structures built during `initVis()` are:
-
-**`vis.nodes`** — array of all nodes from the JSON file.
-
-**`vis.nodeEdges`** — `Map<nodeId, Map<phaseId, edgeList>>`. For every node, stores what its outgoing edges looked like at every phase of optimization, accounting for add/remove/replace instructions.
-
-**`vis.activeNodesByPhase`** — `Map<phaseId, Set<nodeId>>`. Tracks which nodes are alive (created but not yet killed) at each phase.
-
-**`vis.circles`** — fixed grid positions for every node, indexed by node array position. Used exclusively by the static renderer.
-
-When the user selects a phase, `updateVis()` filters to alive nodes and their current edges, then builds two link formats:
-- **`vis.links`** — `{ source: {x, y}, target: {x, y} }` — coordinate objects consumed by the static renderer
-- **`vis.fdLinks`** — `{ source: nodeId, target: nodeId, type }` — ID references consumed by the force-directed renderer
-
-`renderVis()` then calls either `renderStaticVis()` or `renderForceDirectedVis()` depending on the current view toggle.
 
 ## Data Format
 
-The visualizer expects an IR JSON file following the schema in the [JITCIRModeler spec](https://github.com/hlim1/JITCIRModeler/tree/main) (see the updated version on the [`code_fix` branch](https://github.com/hlim1/JITCIRModeler/tree/code_fix)). Key fields used:
-
-- `nodes[].id` — unique node identifier
-- `nodes[].initialEdges` — outgoing edges at creation time
-- `nodes[].instAccess` — map of instruction ID → `{ phaseFnId, type }` where type `7` = CREATE, `3` = KILL, and `0/1/2/4/6` = optimization
-- `nodes[].added`, `nodes[].removed`, `nodes[].replaced` — edge modification instructions per optimization step
-- `fnId2Name` — map of phase function IDs to names; entries containing `"Phase::Run"` are the optimization phases
+The visualizer expects an IR JSON file following the schema in the [JITCIRModeler spec](https://github.com/hlim1/JITCIRModeler/tree/main) (see the updated version on the [`code_fix` branch](https://github.com/hlim1/JITCIRModeler/tree/code_fix)).
 
 To switch to a different IR file, update the path in `loadData()` in `main.js`:
 ```js
