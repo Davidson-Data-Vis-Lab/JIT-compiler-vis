@@ -1,166 +1,170 @@
 /**
- * Static graph renderer using hierarchical/tree layout.
- * Called by renderVis() in main.js when static mode is selected.
- * Calls bindTooltips() from tooltip.js after drawing.
- * 
+ * Static graph renderer.
+ * This is the original renderVis() from the old main.js, extracted here
+ * and renamed renderStaticVis() so main.js can toggle between this and
+ * the force-directed renderer.
+ *
+ * Depends on (set by main.js):
+ *   vis.svg        – persistent SVG element
+ *   vis.nodes      – all nodes
+ *   vis.circles    – fixed grid positions, indexed by node array index
+ *   vis.links      – [{ source: {x,y}, target: {x,y} }] (coordinate objects)
+ *   vis.linkPath   – d3.linkHorizontal generator
+ *   vis.phaseNodes – Set of alive node IDs for the current phase
+ *   vis.filter     – current phase ID (or "none")
+ *
  * @author Ellora Devulapally, Taft Harrell
  */
 
-/**
- * Creates nodes and links and draws onto SVG using static hierarchical layout.
- */
+function getPhasesForInstType(node, type) {
+    const phases = new Set();
+    for (const rec of Object.values(node.instAccess || {})) {
+        if (rec.type === type) phases.add(Number(rec.phaseFnId));
+    }
+    return Array.from(phases).sort((a, b) => a - b);
+}
+
+function getFirstPhaseForInstType(node, type) {
+    const phases = getPhasesForInstType(node, type);
+    return phases.length ? phases[0] : null;
+}
+
 function renderStaticVis() {
     let vis = this;
 
-    // Determine which nodes to show for the current phase
-    let visibleNodes = vis.nodes.filter(n => vis.phaseNodes.has(n.id));
+    const radius = 35;
 
-    // Create copies of links and nodes
-    const links = vis.links.map(link => ({ ...link }));
-    const nodes = visibleNodes.map(node => ({ ...node }));
+    // Ensure vis.svg exists (created once in initVis equivalent).
+    // If the force-directed view destroyed it, recreate it.
+    if (d3.select("#chart-area").select("svg").empty()) {
+        vis.svg = d3.select("#chart-area")
+            .append("svg")
+            .attr("width", 750)
+            .attr("height", 1000);
+    } else {
+        // Re-select in case it was replaced
+        vis.svg = d3.select("#chart-area").select("svg");
+        vis.svg.attr("width", 750).attr("height", 1000).attr("viewBox", null);
+    }
 
-    //Define width and height of SVG
-    const width = 700;
-    const height = 550;
-    const nodeRadius = 10;
+    // Remove visual elements, keep defs slot clean
+    vis.svg.selectAll("circle").remove();
+    vis.svg.selectAll("text").remove();
+    vis.svg.selectAll("path").remove();
+    vis.svg.selectAll("polygon").remove();
+    vis.svg.select("defs").remove();
 
-    // Clear and rebuild the SVG on every render
-    d3.select("#chart-area").select("svg").remove();
-
-    const svg = d3.select("#chart-area")
-        .append("svg")
-        .attr("id", "SVG")
-        .attr("width", width * 1.5)
-        .attr("height", height * 1.5)
-        .attr("viewBox", [-width / 2, -height / 2, width, height]);
-
-    // Create arrow markers
-    svg.append("defs").append("marker")
-        .attr("id", "arrow-static")
+    // Arrow marker
+    vis.svg.append("defs")
+        .append("marker")
+        .attr("id", "arrow")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 20)
+        .attr("refX", 5)
         .attr("refY", 0)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
+        .attr("markerWidth", 2.5)
+        .attr("markerHeight", 2.5)
         .attr("orient", "auto")
         .append("path")
-        .attr("fill", "black")
-        .attr("d", 'M0,-5L10,0L0,5');
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#ff0000");
 
-    // Use dagre or simple positioning algorithm
-    // Option 1: Simple hierarchical layout based on depth
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
-    
-    // Calculate node depths (simple BFS)
-    const depths = new Map();
-    const visited = new Set();
-    
-    // Find root nodes (nodes with no incoming edges)
-    const hasIncoming = new Set(links.map(l => 
-        typeof l.target === "object" ? l.target.id : l.target
-    ));
-    const rootNodes = nodes.filter(n => !hasIncoming.has(n.id));
-    
-    // BFS to assign depths
-    const queue = rootNodes.map(n => ({ node: n, depth: 0 }));
-    while (queue.length > 0) {
-        const { node, depth } = queue.shift();
-        if (visited.has(node.id)) continue;
-        
-        visited.add(node.id);
-        depths.set(node.id, depth);
-        
-        // Find children
-        const children = links
-            .filter(l => (typeof l.source === "object" ? l.source.id : l.source) === node.id)
-            .map(l => nodeMap.get(typeof l.target === "object" ? l.target.id : l.target))
-            .filter(Boolean);
-        
-        children.forEach(child => {
-            if (!visited.has(child.id)) {
-                queue.push({ node: child, depth: depth + 1 });
+    // Draw circles — all nodes, opacity reflects alive status
+    vis.svg.selectAll("circle")
+        .data(vis.nodes)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("cx", (d, i) => vis.circles[i].x)
+        .attr("cy", (d, i) => vis.circles[i].y)
+        .attr("r", radius)
+        .attr("fill", "#ADD8E6")
+        .attr("opacity", d => {
+            if (!vis.phaseNodes) return 1;
+            return vis.phaseNodes.has(d.id) ? 1 : 0.1;
+        });
+
+    // Node ID labels
+    vis.svg.selectAll("text")
+        .data(vis.nodes)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", (d, i) => d.id < 10 ? vis.circles[i].x - 5 : vis.circles[i].x - 7)
+        .attr("y", (d, i) => vis.circles[i].y - 10)
+        .attr("fill", "black")
+        .style("font-size", "20px")
+        .text(d => d.id);
+
+    // Draw edges — vis.links already has { source: {x,y}, target: {x,y} }
+    const edgeSelection = vis.svg.selectAll("path.edge")
+        .data(vis.links)
+        .enter()
+        .append("path")
+        .attr("class", "edge")
+        .attr("d", vis.linkPath)
+        .attr("fill", "none")
+        .attr("stroke", "#000000")
+        .attr("stroke-width", 0.5)
+        .attr("marker-end", "url(#arrow)");
+
+    // ── Tooltip and edge highlight (original logic, coordinate-based) ──────────
+    const CREATE = 7;
+    const KILL = 3;
+    const OPT_TYPES = new Set([0, 1, 2, 4, 6]);
+
+    const nodes = vis.svg.selectAll(".node");
+    const edges = vis.svg.selectAll(".edge");
+
+    nodes.on('mouseover', (event, d) => {
+        const alive_status =
+            vis.phaseNodes ? (vis.phaseNodes.has(d.id) ? "True" : "False") : "True";
+
+        const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
+        const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
+
+        const optimizedPhases = new Set();
+        for (const rec of Object.values(d.instAccess || {})) {
+            if (OPT_TYPES.has(rec.type)) optimizedPhases.add(Number(rec.phaseFnId));
+        }
+        const optimizedPhasesStr = optimizedPhases.size
+            ? Array.from(optimizedPhases).sort((a, b) => a - b).join(", ")
+            : "None";
+
+        // Edge highlighting: compare coordinates (original approach)
+        const nodeXPosition = vis.circles[d.id].x;
+        const nodeYPosition = vis.circles[d.id].y;
+
+        vis.iterableEdges = edges._groups[0];
+        vis.iterableEdges.forEach(edge => {
+            edge.setAttribute("stroke-width", 0);
+            const src = edge.__data__["source"];
+            const tgt = edge.__data__["target"];
+            if ((src.x === nodeXPosition && src.y === nodeYPosition) ||
+                (tgt.x === nodeXPosition && tgt.y === nodeYPosition)) {
+                edge.setAttribute("stroke-width", 2.5);
             }
         });
-    }
-    
-    // Assign nodes to unvisited (shouldn't happen in well-formed graph)
-    nodes.forEach(n => {
-        if (!depths.has(n.id)) {
-            depths.set(n.id, 0);
+
+        d3.select('#tooltip-box')
+            .style('display', 'block')
+            .style('left', event.pageX + 'px')
+            .style('top', event.pageY + 'px')
+            .html(`
+                <ul>
+                  <li><strong>Node ID:</strong> ${d.id}</li>
+                  <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+                  <li><strong>Alive?:</strong> ${alive_status}</li>
+                  <li><strong>Size:</strong> ${d.size} bytes</li>
+                  <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+                  <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
+                  <li><strong>Killed in Phase:</strong> ${killPhase}</li>
+                </ul>
+            `);
+    })
+    .on('mouseleave', () => {
+        if (vis.iterableEdges) {
+            vis.iterableEdges.forEach(edge => edge.setAttribute("stroke-width", 0.5));
         }
+        d3.select('#tooltip-box').style('display', 'none');
     });
-    
-    // Group nodes by depth
-    const maxDepth = Math.max(...Array.from(depths.values()));
-    const nodesByDepth = new Map();
-    for (let i = 0; i <= maxDepth; i++) {
-        nodesByDepth.set(i, []);
-    }
-    
-    nodes.forEach(n => {
-        const depth = depths.get(n.id);
-        nodesByDepth.get(depth).push(n);
-    });
-    
-    // Position nodes
-    const xSpacing = width / (maxDepth + 1);
-    const yPadding = 50;
-    
-    nodes.forEach(n => {
-        const depth = depths.get(n.id);
-        const nodesAtDepth = nodesByDepth.get(depth);
-        const index = nodesAtDepth.indexOf(n);
-        const ySpacing = (height - 2 * yPadding) / (nodesAtDepth.length + 1);
-        
-        n.x = -width / 2 + xSpacing * (depth + 0.5);
-        n.y = -height / 2 + yPadding + ySpacing * (index + 1);
-    });
-
-    // Draw links
-    const link = svg.append("g")
-        .attr("fill", "none")
-        .attr("stroke-width", 1.5)
-        .selectAll("path")
-        .data(links)
-        .join("path")
-        .attr("class", "edge")
-        .attr("stroke", "black")
-        .attr("marker-end", "url(#arrow-static)")
-        .attr("d", d => {
-            const source = typeof d.source === "object" ? d.source : nodeMap.get(d.source);
-            const target = typeof d.target === "object" ? d.target : nodeMap.get(d.target);
-            return `M${source.x},${source.y}L${target.x},${target.y}`;
-        });
-
-    // Draw nodes
-    const node = svg.append("g")
-        .attr("fill", "currentColor")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .selectAll("g")
-        .data(nodes)
-        .join("g")
-        .attr("transform", d => `translate(${d.x},${d.y})`);
-
-    node.append("circle")
-        .attr("class", "node")
-        .attr("stroke", "white")
-        .attr("stroke-width", 1.5)
-        .attr("r", nodeRadius)
-        .attr('fill', d => '#6baed6');
-
-    node.append("text")
-        .attr("x", 10)
-        .attr("y", "0.31em")
-        .text(d => d.id)
-        .clone(true).lower()
-        .attr("fill", "none");
-
-    node.on('dblclick', (e, d) => console.log(d));
-
-    // Store on vis so tooltip.js can bind hover handlers to these elements
-    vis.nodeSelection = node;
-    vis.linkSelection = link;
-
-    bindTooltips();  // tooltip.js
 }

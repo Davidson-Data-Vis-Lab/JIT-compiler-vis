@@ -4,37 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graph Visualizer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
-
 <body>
-    <div id="sidebar"></div>
     <div id="mainFlexBox">
         <div id="chart-area"></div>
         <div id="SidebarFlex">
-            <label for="phases">Select phase:</label>
-                <select name="phase" id="phaseDropDown"></select>
-            <button id = "phaseConfirmation">Update Visualization</button>
+            <label for="phaseDropDown">Select phase:</label>
+            <select name="phase" id="phaseDropDown"></select>
+            <button id="phaseConfirmation">Update Visualization</button>
+            <button id="visTypeToggle">
+                Switch to <span id="currentVisType">Force-Directed</span> View
+            </button>
             <div id="tooltip-box"></div>
         </div>
     </div>
-    <!-- Existing phase selection -->
-<select id="phaseDropDown"></select>
-<button id="phaseConfirmation">Update Visualization</button>
 
-<!-- New: Visualization type toggle -->
-<button id="visTypeToggle">
-    Switch to <span id="currentVisType">Force-Directed</span> View
-</button>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="main.js"></script>
-<script src="static.js"></script>
-<script src="forcedirected.js"></script>
-<script src="buttons.js"></script>
-<script src="tooltip.js"></script>
+    <script src="main.js"></script>
+    <script src="static.js"></script>
+    <script src="forcedirected.js"></script>
+    <script src="buttons.js"></script>
+    <script src="tooltip.js"></script>
 </body>
 </html>
