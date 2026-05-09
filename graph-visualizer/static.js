@@ -2,7 +2,7 @@
  * Static graph renderer.
  * This is the original renderVis() from the old main.js, extracted here
  * and renamed renderStaticVis() so main.js can toggle between this and
- * the force-directed renderer.
+ * the force-directed renderer
  *
  * Depends on (set by main.js):
  *   vis.svg        – persistent SVG element
@@ -16,6 +16,8 @@
  * @author Ellora Devulapally, Taft Harrell
  */
 
+
+//TODO: comment these functions 
 function getPhasesForInstType(node, type) {
     const phases = new Set();
     for (const rec of Object.values(node.instAccess || {})) {
@@ -107,7 +109,6 @@ function renderStaticVis() {
         .attr("stroke-width", 0.5)
         .attr("marker-end", "url(#arrow)");
 
-    // ── Tooltip and edge highlight (original logic, coordinate-based) ──────────
     const CREATE = 7;
     const KILL = 3;
     const OPT_TYPES = new Set([0, 1, 2, 4, 6]);
