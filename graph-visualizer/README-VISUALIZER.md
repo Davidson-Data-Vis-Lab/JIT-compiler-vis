@@ -1,30 +1,19 @@
 # Graph Visualizer
 
-A D3.js tool for visualizing a JIT compiler's intermediate representation (IR) graph across optimization phases. You can step through each phase of compilation and see which nodes are alive, which edges change, and inspect individual nodes via hover tooltips.
-
-## Running the Visualizer
-
-You must serve the files from a local server — the browser blocks `d3.json()` when opening HTML files directly from disk.
-
-```bash
-# From the repo root:
-python3 -m http.server
-# Then open http://localhost:8000/graph-visualizer/index.html
-```
-
-Or use the VS Code **Live Server** extension and open `index.html`.
-
-## How to Use
-
+A D3.js tool for visualizing a JIT compiler's intermediate representation (IR) graph across optimization phases. This visualizer allows you to step through phases, switch between a static or force directed visualization type, and hover over nodes to see key information about them at each phase. 
 1. Use the **phase dropdown** to select an optimization phase and click **Update Visualization**.
 2. Use the **Switch View** button to toggle between Static and Force-Directed layouts.
 3. **Hover** over any node to see its details (ID, opcode, alive status, creation/kill phase, optimization phases) and highlight its connected edges.
 
-## File Overview
+## Running the Visualizer
 
-| File | Responsibility |
-|---|---|
-| `main.js` | Entry point. Loads data, computes phase/edge data structures, builds `vis.circles` and both link formats, dispatches rendering. |
+You can view the visualizer at https://davidson-data-vis-lab.github.io/JIT-compiler-vis/graph-visualizer/
+
+Or use the VS Code Live Server extension and open `index.html`.
+
+
+## File Overview
+**`main.js`**: Loads data, computes phase/edge data structures, builds `vis.circles` and the link formats for each of the visualizations, and dispatches rendering to the proper vis files based on selected 
 | `static.js` | Renders a fixed grid layout. All nodes always rendered; dead nodes shown at low opacity. Tooltip and edge highlight use coordinate matching. |
 | `forcedirected.js` | Renders a physics-based force-directed layout. Only alive nodes shown. Drag to reposition nodes. |
 | `buttons.js` | Populates the phase dropdown and wires up the Update button. |

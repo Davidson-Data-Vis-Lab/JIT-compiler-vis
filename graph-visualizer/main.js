@@ -12,8 +12,6 @@
 let IR_data;
 let currentVisualization = 'static'; // default view
 
-// LOADING DATA 
-
 
 /**
  * Load data and wait for it to load before calling any other functions
@@ -26,7 +24,7 @@ async function loadData() {
     return IR_data;
 }
 
-// INITIALIZE DATA
+
 /**
  * Initializes the visualization by parsing through the data, getting all phases and phaseIDs, setting
  * initial phase to display, get all nodes and edges, and create options in the HTML select element.
@@ -48,6 +46,7 @@ async function initVis() {
     vis.activeNodesByPhase = determineNodeActiveStatus();
 
     // vis.circles: fixed grid positions keyed by node array index.
+    // Used by the static renderer (same formula as original main.js).
     const radius = 35;
     const cols = 10;
     vis.circles = vis.nodes.map((node, i) => {
@@ -66,9 +65,11 @@ async function initVis() {
     updateVis();
 }
 
+// ─── Toggle ───────────────────────────────────────────────────────────────────
+
 /**
- * A function that creates and updates the visualization toggle 
- * Allowing the user to switch between two (or more) different vis types
+ * Creates and updates the visualization toggle, allowing the user to switch
+ * between static and force-directed views.
  */
 function setupVisualizationToggle() {
     const toggleButton = document.getElementById("visTypeToggle");
@@ -86,9 +87,11 @@ function setupVisualizationToggle() {
     }
 }
 
-// UPDATE VIS
+// ─── Update ───────────────────────────────────────────────────────────────────
+
 /**
  * Sorts through nodes and edges, filtering based on the phase the user has selected.
+ * Builds both link formats so either renderer can be called without re-filtering.
  */
 function updateVis() {
     let vis = this;
@@ -133,157 +136,28 @@ function updateVis() {
     renderVis();
 }
 
-    // Remove only the visual elements, not the defs
-    vis.svg.selectAll("circle").remove();
-    vis.svg.selectAll("text").remove();
-    vis.svg.selectAll("path").remove();
-    vis.svg.selectAll("polygon").remove();
+// ─── Render dispatcher ────────────────────────────────────────────────────────
 
-    // Re-add the arrow marker definition (since it was removed)
-    vis.svg.select("defs").remove(); // Remove old defs
-    vis.svg.append("defs")
-        .append("marker")
-        .attr("id", "arrow")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 5)
-        .attr("refY", 0)
-        .attr("markerWidth", 2.5)
-        .attr("markerHeight", 2.5)
-        .attr("orient", "auto")
-        .append("path")
-        .attr("d", "M0,-5L10,0L0,5")
-        .attr("fill", "#ff0000");
-
-    // Drawing circles out onto screen
-    vis.svg.selectAll("circle")
-        .data(vis.nodes)
-        .enter()
-        .append("circle")
-        .attr("class", "node")
-        .attr("cx", (d, i) => vis.circles[i].x)
-        .attr("cy", (d, i) => vis.circles[i].y)
-        .attr("r", radius) 
-        .attr("fill", "#ADD8E6")
-        .attr("opacity", (d) => {
-            if (vis.filter == "none") {
-                return 1;
-            }
-            else {
-                if (vis.phaseNodes.has(d.id)) {
-                    return 1;
-                }
-                else {
-                    return 0.1;
-                }
-            }
-        });
-
-    //Add node IDs to visualized nodes
-    vis.svg.selectAll("text")
-        .data(vis.nodes)
-        .enter()
-        .append("text")
-        .attr("class", "label")
-        .attr("x", (d, i) => {
-            if (d.id < 10) {
-                return vis.circles[i].x - 5;
-            }
-            return vis.circles[i].x - 7;
-        })
-        .attr("y", (d, i) => vis.circles[i].y - 10)
-        .attr("fill", "black")
-        .style("font-size", "20px")
-        .text(d => d.id);
-    
-    // Draw the paths with arrows (ONLY ONCE!)
-    vis.svg.selectAll("path.edge")
-        .data(vis.links)
-        .enter()
-        .append("path")
-        .attr("class", "edge")
-        .attr("d", vis.linkPath)
-        .attr("fill", "none")
-        .attr("stroke", "#000000")
-        .attr("stroke-width", 0.5)
-        .attr("marker-end", "url(#arrow)");
-
-    //Hover effect for nodes
-    const nodes = vis.svg.selectAll(".node");
-    const edges = vis.svg.selectAll(".edge");
-
-    nodes
-    .on('mouseover', (event, d) => {
-        const alive_status = 
-            vis.filter != "none"
-                ? vis.phaseNodes.has(d.id) ? "True" : "False"
-                : "True";
-    
-        const CREATE = 7;
-        const KILL   = 3;
-
-        const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
-        const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
-
-        const OPT_TYPES = new Set([0, 1, 2, 4, 6]); 
-
-        const optimizedPhases = new Set();
-        for (const rec of Object.values(d.instAccess || {})) {
-            if (OPT_TYPES.has(rec.type)) optimizedPhases.add(Number(rec.phaseFnId));
-        }
-        const optimizedPhasesStr =
-            optimizedPhases.size ? Array.from(optimizedPhases).sort((a,b)=>a-b).join(", ") : "None";  
-    
-        const nodeXPosition = vis.circles[d.id]["x"];
-        const nodeYPosition = vis.circles[d.id]["y"];
-        
-        vis.iterableEdges = edges._groups[0];
-        vis.iterableEdges.forEach(edge => {
-            edge.setAttribute("stroke-width", 0);
-            const edgeSourceXPosition = edge.__data__["source"]["x"];
-            const edgeSourceYPosition = edge.__data__["source"]["y"];
-            const edgeTargetXPosition = edge.__data__["target"]["x"];
-            const edgeTargetYPosition = edge.__data__["target"]["y"];
-    
-            if ((edgeSourceXPosition == nodeXPosition && edgeSourceYPosition == nodeYPosition) ||
-                (edgeTargetXPosition == nodeXPosition && edgeTargetYPosition == nodeYPosition)) {
-                edge.setAttribute("stroke-width", 2.5);
-            }
-        });
-        
-        //Tooltip selection
-        d3.select('#sidebar')
-            .style('display', 'block')
-            .style('left', (event.pageX) + 'px')
-            .style('top', (event.pageY) + 'px')
-            .html(`
-                <ul>
-                  <li><strong>Node ID:</strong> ${d.id}</li>
-                  <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
-                  <li><strong>Alive?:</strong> ${alive_status}</li>
-                  <li><strong>Size:</strong> ${d.size} bytes</li>
-                  <li><strong>Created in Phase:</strong> ${creationPhase}</li>
-                  <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
-                  <li><strong>Killed in Phase:</strong> ${killPhase}</li>
-                </ul>
-              `);
-    })
-    .on('mouseleave', () => {
-        vis.iterableEdges.forEach(edge => {
-            edge.setAttribute("stroke-width", 0.5);
-        });
-
-        d3.select('#sidebar').style('display', 'none');
-    });
+/**
+ * Delegates rendering to the appropriate visualization type.
+ */
+function renderVis() {
+    if (currentVisualization === 'static') {
+        renderStaticVis();        // static.js
+    } else {
+        renderForceDirectedVis(); // forcedirected.js
+    }
 }
+
+// ─── Shared data logic ────────────────────────────────────────────────────────
 
 /**
  * Parses through the entire IR file and generates a data structure containing every single 
  * node's incoming edges for every single phase.
  * 
- * @returns nodeEdges -- a dictionary of the following format: keys with node IDs, values as sub-dictionarys with
- * keys as phase IDs, values as a list of incoming edges.
+ * @returns nodeEdges -- a Map with node IDs as keys, values as sub-Maps with
+ * phase IDs as keys and lists of incoming edges as values.
  */
-
 function organizeEdges() {
     let vis = this;
 
@@ -308,11 +182,13 @@ function organizeEdges() {
         for (const instruction of node_replaced) edge_relevant_instructions.push(instruction);
         for (const instruction of node_added) edge_relevant_instructions.push(instruction);
 
+        // Sort numerically — instruction IDs are incremented as created, so this is also chronological
         edge_relevant_instructions.sort((a, b) => Number(a[0]) - Number(b[0]));
 
         var phaseNumber = 0;
         var phaseID = 0;
 
+        // Add empty lists for all phases before the node was created
         while (first_instruction_phase > Number(vis.phaseIDs[phaseID])) {
             phaseDictionary.set(Number(vis.phaseIDs[phaseID]), []);
             phaseID += 1;
@@ -366,6 +242,7 @@ function organizeEdges() {
             }
         });
 
+        // Node doesn't go through optimization: fill all phases from initialEdges or empty
         if (edge_relevant_instructions.length == 0) {
             phaseNumber = 0;
             phaseDictionary.set(first_instruction_phase, node.initialEdges);
@@ -381,6 +258,7 @@ function organizeEdges() {
                 phaseNumber += 1;
             });
         } else {
+            // Carry forward edges for phases after the last instruction
             for (let i = 0; i < vis.phaseIDs.length; i++) {
                 phaseKeys = Array.from(phaseDictionary.keys());
                 if (!(phaseKeys.includes(Number(vis.phaseIDs[i])))) {
@@ -388,10 +266,7 @@ function organizeEdges() {
                 }
             }
         }
-        
-
-    })
-    console.log(nodeEdges);
+    });
 
     return nodeEdges;
 }
@@ -400,13 +275,12 @@ function organizeEdges() {
  * Parses through all of the instructions for every node of the JSON file and identifies
  * which nodes are alive and which are dead for every single phase.
  * 
- * @returns activeNodesByPhase -- a dictionary with keys as phase IDs and values as a set
- * of node IDs representing all nodes alive during that phase.
+ * @returns activeNodesByPhase -- a Map with phase IDs as keys and Sets of alive node IDs as values.
  */
-
 function determineNodeActiveStatus() {
     let vis = this;
 
+    // These types are specified by Dr. Lim's JSON file specification
     const CREATE = 7;
     const KILL = 3;
 
