@@ -30,8 +30,10 @@ JIT-compiler-vis/
 
 ## Data Files
 
-The IR JSON files follow the schema defined in [Dr. Lim's JITCIRModeler spec](https://github.com/hlim1/JITCIRModeler/tree/main). We made several updates to the schema after spring break — the diff is documented [here](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?tab=t.0#heading=h.anls0jw7z3b9).
+* [Updated branch](https://github.com/hlim1/JITCIRModeler/tree/code_fix) of the repository with Dr. Lim's IR modeler (**updated JSON file specification in the README**): [https://github.com/hlim1/JITCIRModeler/tree/code_fix](https://github.com/hlim1/JITCIRModeler/tree/code_fix)
+    * The changes are summarized [here](https://docs.google.com/document/d/1jwRePJLvh4XAH4irzjmmdnO3b0wv48TX3sCchfUoRec/edit?tab=t.0#heading=h.anls0jw7z3b9)
 
-The Python scripts in `toy-datasets/IR/` were written early on to explore the data:
-- **`phase_grouper.py`** — groups IR instructions by optimization phase
-- **`test_stepthrough.py`** — steps through instructions chronologically, useful for debugging edge/node state at any point in optimization
+* Original repository with Dr. Lim's IR modeler (contains the JSON file specification): [https://github.com/hlim1/JITCIRModeler/tree/main](https://github.com/hlim1/JITCIRModeler/tree/main)
+
+
+* Relevant papers: [Google Drive](https://drive.google.com/drive/folders/12Ie1mGx-F6mFgl4Mr23RGoWGHZ8u4YIx?usp=sharing)
