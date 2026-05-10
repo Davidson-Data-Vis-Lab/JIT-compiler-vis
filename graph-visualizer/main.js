@@ -76,14 +76,16 @@ function setupVisualizationToggle() {
     const currentVisLabel = document.getElementById("currentVisType");
 
     if (toggleButton) {
-        toggleButton.addEventListener("click", () => {
-            currentVisualization = (currentVisualization === 'static') ? 'force-directed' : 'static';
-            if (currentVisLabel) {
-                currentVisLabel.textContent = currentVisualization === 'static' ? 'Static' : 'Force-Directed';
-            }
-            // Data hasn't changed, just re-render in the new mode
-            renderVis();
-        });
+       toggleButton.addEventListener("click", () => {
+        if (currentVisualization === 'static') {
+            currentVisualization = 'force-directed';
+        currentVisLabel.textContent = 'Static';
+    } else {
+        currentVisualization = 'static';
+        currentVisLabel.textContent = 'Force-Directed';
+    }
+    renderVis();
+});
     }
 }
 
