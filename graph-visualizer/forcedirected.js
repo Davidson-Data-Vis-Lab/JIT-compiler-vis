@@ -52,8 +52,10 @@ function renderForceDirectedVis() {
     const links = vis.fdLinks.map(l => ({ ...l }));
     const nodes = visibleNodes.map(n => Object.create(n));
 
-    const width = 700;
-    const height = 550;
+    const container = document.getElementById("chart-area");
+    const width = container.clientWidth || 800;
+    const height = width; // keep it square, or use window.innerHeight  
+    // const height = 550;
     const nodeRadius = 10;
     let collisionForce = (100 - Math.floor(nodes.length)) / 1.5;
     if (collisionForce < 30) collisionForce = 30;

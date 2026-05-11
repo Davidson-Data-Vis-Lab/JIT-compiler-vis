@@ -75,4 +75,48 @@ function bindTooltips() {
             vis.linkSelection.attr("stroke-width", 1.5);
             d3.select('#tooltip-box').style('display', 'none');
         });
+    vis.nodeSelection
+        .on('mouseover touchstart', (event, d) => {
+            const alive_status = vis.phaseNodes.has(d.id) ? "True" : "False";
+
+            const creationPhase = getFirstPhaseForInstType(d, CREATE) ?? "N/A";
+            const killPhase = getFirstPhaseForInstType(d, KILL) ?? "N/A";
+
+            const optimizedPhases = new Set();
+            for (const rec of Object.values(d.instAccess || {})) {
+                if (OPT_TYPES.has(rec.type)) optimizedPhases.add(Number(rec.phaseFnId));
+            }
+            const optimizedPhasesStr =
+                optimizedPhases.size ? Array.from(optimizedPhases).sort((a, b) => a - b).join(", ") : "None";
+
+            // Highlight only edges connected to this node, hide all others
+            vis.linkSelection
+                .attr("stroke-width", edgeD => {
+                    const srcId = typeof edgeD.source === "object" ? edgeD.source.id : edgeD.source;
+                    const tgtId = typeof edgeD.target === "object" ? edgeD.target.id : edgeD.target;
+                    return (srcId === d.id || tgtId === d.id) ? 1.5 : 0;
+                });
+
+            //Display node information here
+            d3.select('#tooltip-box')
+                .style('display', 'block')
+                .style('left', (event.pageX) + 'px')
+                .style('top', (event.pageY) + 'px')
+                .html(`
+                    <ul>
+                      <li><strong>Node ID:</strong> ${d.id}</li>
+                      <li><strong>Opcode:</strong> ${d.opcode}: ${d.mnemonic}</li>
+                      <li><strong>Alive?:</strong> ${alive_status}</li>
+                      <li><strong>Size:</strong> ${d.size} bytes</li>
+                      <li><strong>Created in Phase:</strong> ${creationPhase}</li>
+                      <li><strong>Modified in Phase(s):</strong> ${optimizedPhasesStr}</li>
+                      <li><strong>Killed in Phase:</strong> ${killPhase}</li>
+                    </ul>
+                `);
+        })
+        .on('mouseleave touchend', () => {
+            vis.linkSelection.attr("stroke-width", 1.5);
+            d3.select('#tooltip-box').style('display', 'none');
+        });
+        
 }

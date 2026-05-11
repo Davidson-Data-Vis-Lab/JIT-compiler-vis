@@ -73,7 +73,10 @@ label[for="phaseDropDown"] {
     color: #333;
     width: 375px;
 }
-
+#chart-area svg {
+    max-width: 100%;
+    height: auto;
+}
 .node:hover {
     stroke: black;
     stroke-width: 3px;
@@ -83,4 +86,26 @@ label[for="phaseDropDown"] {
     background-color: #00b3b3;
     border: 2px solid #006666;
     color: white;
+}
+
+@media (max-width: 768px) {
+    #mainFlexBox {
+        flex-direction: column;
+        width: 100%;
+        max-height: none;
+    }
+    #button-box {
+        transform: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    #sidebar {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
